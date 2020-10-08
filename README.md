@@ -4,6 +4,7 @@ I plan for it to use opencv2 to align pictures based on a given feature, but (as
 # First Commit (program capabilities)
 ### Completed
 - File managment, gathering pictures from a given directory and taking all photos from it that aren't curropted (0 bytes in size). Opencv2 can display all of the pictures without any alignment, just raw pictures (not raw as in file type).
+- ## Essentially it's a picture slide player that slides pictures at the speed u want
 ### ToDo
 - Learn opencv drawing and identifying specific features (I don't know any of the actual termonoligy)
 - Have adjusted pictures be written to a new directory.
