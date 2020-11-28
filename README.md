@@ -17,7 +17,7 @@ The only thing that changed with this commit is that pictures display in color b
 - Possibly create and option for in which order they'll be displayed (oldest, latest).
 - Learn how GitHub works with "README.md" files.
 
-# Archived commits
+# Archived Versions
 ## First Commit
 Completed:
 - File managment, gathering pictures from a given directory and taking all photos from it that aren't curropted (0 bytes in size). Opencv2 can display all of the pictures without any alignment, just raw pictures (not raw as in file type).
