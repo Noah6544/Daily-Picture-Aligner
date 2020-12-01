@@ -3,7 +3,7 @@ This program is intended to eventually be able to take all photos in a folder an
 I plan for it to use opencv2 to align pictures based on a given feature, but (as of 10-8-2020) I haven't learned any opencv2 besides basic things (imread, imshow, waitkey, etc.)
 
 # Current Version (Second)
-The only thing that changed with this commit is that pictures display in color by default, forogt to set the flag as 1 instead of 0 which is color and grayscale respectively. 
+The only thing that changed with this commit is that pictures display in color by default, forgot to set the flag as 1 instead of 0 which is color and grayscale respectively. 
 
 # Issues
 - There's a problem where files aren't either being added to the list or aren't being displayed, with my directory of images about 80 of the 200+ images aren't being displayed. 
