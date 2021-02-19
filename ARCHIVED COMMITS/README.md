@@ -6,3 +6,4 @@ Completed
 ## Second Commit
 Completed:
 - Changed it so that the image displays in full color
+- github is difficult
