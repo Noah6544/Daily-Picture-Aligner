@@ -1,0 +1,22 @@
+create a path that holds the picture library
+sort the files in that folder to just the ones that have data (prevents curropted)
+add those files to a list called refined
+sort the files again in the order of the date that they were creatd
+add the files to a list called refined
+
+
+
+to sort files by date:
+
+using refined list from before:
+
+variable to hold the location of the last indexed location
+variable to hold the current location of the list
+for every item in refined:
+    add a numerical value to lastnumb from the file for that is
+
+
+
+
+
+
