@@ -8,14 +8,14 @@ I plan for it to use opencv2 to align pictures based on a given feature, but (as
 - made the code cleaner i think....
 
 # Issues
-- There's a problem where files aren't either being added to the list or aren't being displayed, with my directory of images about 80 of the 200+ images aren't being displayed. 
-- Files aren't displayed in order either, which deafeats the purpose of what I'm trying to make.
+- None that I'm aware of.
 
 # ToDo
 - Learn opencv drawing and identifying specific features (I don't know any of the actual termonoligy)
 - Have adjusted pictures be written to a new directory.
 - Possibly choices to be aligned at different features (hair, eyebrows, leg, torso, etc.).
 - Possibly create and option for in which order they'll be displayed (oldest, latest).
+- Possible create a GUI version
 - # LEARN HOW TO USE GITHUB IDK HOW TO COMMIT REMOTELY IN A CORRECT BRANCH ITS SO CONFUSiNG
 
 # Archived Versions
