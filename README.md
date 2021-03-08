@@ -12,6 +12,10 @@ I plan for it to use opencv2 to align pictures based on a given feature, but (as
 - wrote picture list to file to be read. not sure why its useful. im sure i had a reason but i forgot
 - made the code cleaner i think....
 
+# Contributions
+- I'm creating this for a project and only individuals who signed up with me can contribute. In a few months I would appreciate any and all new contributions.
+- This said, you can make a contribution to all github related material. 
+
 # Issues
 - None that I'm aware of.
 
