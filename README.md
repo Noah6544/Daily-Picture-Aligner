@@ -5,7 +5,8 @@ I plan for it to use opencv2 to align pictures based on a given feature, but (as
 # Inspiration
 - I wanted to make this after manually aligning the first 60 pictures of my picture-every-day project. It took hours in total and I hope this can save me and lots of people time. 
 - I want to make a tutorial which will have an easier to use executable file for people on YouTube who might be wanting to do a similar thing without getting discouraged with all the editing programs or github pages.
-- I'm submitting this in a competition which is making me finally take more time on this project (started months ago)
+- Resume project and something that could give me ego points if I post to reddit
+- ## As with all personal projects, I hope to learn more about coding, github, and the entire process as a whole; I want to increase my experience.
 
 # Current Version (Third)
 - sorted pictures by date
@@ -20,7 +21,7 @@ I plan for it to use opencv2 to align pictures based on a given feature, but (as
 - None that I'm aware of.
 
 # ToDo
-- Learn opencv drawing and identifying specific features (I don't know any of the actual termonoligy)
+- Move from OpenCv haarcascades, to google's mediapipe to find the eye pupils not only more accurately but also faster and more efficiently.
 - Have adjusted pictures be written to a new directory.
 - Possibly choices to be aligned at different features (hair, eyebrows, leg, torso, etc.).
 - Possibly create and option for in which order they'll be displayed (oldest, latest).
