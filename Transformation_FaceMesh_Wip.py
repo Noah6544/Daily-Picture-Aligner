@@ -6,7 +6,6 @@ import time
 import mediapipe as mp
 import cv2 as cv
 import random
-
 ###IMPORTS
 
 
