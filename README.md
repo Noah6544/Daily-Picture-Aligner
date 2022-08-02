@@ -1,6 +1,8 @@
 # Daily-Picture-Aligner
-This program is intended to eventually be able to take all photos in a folder and align them automatically based on a given feature (eye, hair, eyebrow, etc.). 
-I plan for it to use opencv2 to align pictures based on a given feature, but (as of 10-8-2020) I haven't learned any opencv2 besides basic things (imread, imshow, waitkey, etc.)
+This program is intended to take all photos in a folder and align them automatically based on a given feature (eye, hair, eyebrow, etc.). 
+This project is using opencv to handle opening, displaying, and translating images. MediaPipe provides 468 facial landmarks to extract and calculate with.
+
+#### Do not run any files called "Transformation" or the "heic_to_jpg" as they are both WIP and not complete.
 
 # Inspiration
 - I wanted to make this after manually aligning the first 60 pictures of my picture-every-day project. It took hours in total and I hope this can save me and lots of people time. 
@@ -8,24 +10,45 @@ I plan for it to use opencv2 to align pictures based on a given feature, but (as
 - Resume project and something that could give me ego points if I post to reddit
 - ## As with all personal projects, I hope to learn more about coding, github, and the entire process as a whole; I want to increase my experience.
 
-# Current Version (Third)
-- sorted pictures by date
-- wrote picture list to file to be read. not sure why its useful. im sure i had a reason but i forgot
-- made the code cleaner i think....
-
-# Contributions
-- I'm creating this for a project and only individuals who signed up with me can contribute. In a few months I would appreciate any and all new contributions.
-- This said, you can make a contribution to all github related material. 
-
-# Issues
-- None that I'm aware of.
-
 # ToDo
-- Move from OpenCv haarcascades, to google's mediapipe to find the eye pupils not only more accurately but also faster and more efficiently.
 - Have adjusted pictures be written to a new directory.
 - Possibly choices to be aligned at different features (hair, eyebrows, leg, torso, etc.).
 - Possibly create and option for in which order they'll be displayed (oldest, latest).
 - Possible create a GUI version
 
-# Archived Versions
-[Archived versions](https://github.com/Noah6544/Daily-Picture-Aligner/tree/archived_commits#archived-versions)
+# Contributions
+- I greatly appreciate your interest in this project. Feel free to play around with it and fork to experiment.
+- However, this project is a real learning process for me so until I get a releasable version I won't be merging any pull requests because this is a fairly simple project I think an expert could do in a few days.
+
+
+## Documentation
+### "Transformation_FaceMesh_Wip"   
+
+### INCOMPLETE
+    
+- This is the going to be the main application for the program. Currently, I have this file as the updated version which is using MediaPipes "FaceMesh" to detect 468 individual points. 
+
+      This file uses MediaPipe's FaceMesh solution for eye coordinates (more accurate).
+ 
+      Currently working on updating this to extract these points for each image.
+
+- The difference between this file and "Transformation WIP updated.py" is that this file uses MediaPipes FaceMesh to gather the points which is much more accurate (WIP), as apposed to the rough approximations of MediaPipes FaceDetection.
+
+### Transformation_FaceDetection_Old
+    This file uses MediaPipe's FaceDetection solution for eye coordinates (inaccurate).
+- This file works in that it translates the images, except it is largely inaccurate, and the math that moves the images is likely wrong. This is the precursor and more crude version of the above file.
+
+
+### heic_to_jpg
+    Currently broken as CV doesn't recognize "converted" images. DO NOT USE.
+- As the name suggests, this is  a quick script to convert between the iphone file type in the case that the users is taking the daily pictures with their phone, as I am. 
+
+### webcam_facemesh.py
+
+- This is an interesting script which uses the computer's webcame to display the facemesh on the subjects face.
+- This script was a proof of concept and mainly taken from MediaPipes documentation page to see how much more accurate the facemesh model was.
+
+
+
+
+
