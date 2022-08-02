@@ -1,12 +1,30 @@
-# Development Branch
+# Daily-Picture-Aligner
+This program is intended to take all photos in a folder and align them automatically based on a given feature (eye, hair, eyebrow, etc.). 
+This project is using opencv to handle opening, displaying, and translating images. MediaPipe provides 468 facial landmarks to extract and calculate with.
 
-#### Everything here is in an incomplete state. RUN AT YOUR OWN RISK!
+#### Do not run any files called "Transformation" or the "heic_to_jpg" as they are both WIP and not complete.
 
-    This project is nearning the finish line after 2 years, now that its using MediaPipe FaceMesh .
+# Inspiration
+- I wanted to make this after manually aligning the first 60 pictures of my picture-every-day project. It took hours in total and I hope this can save me and lots of people time. 
+- I want to make a tutorial which will have an easier to use executable file for people on YouTube who might be wanting to do a similar thing without getting discouraged with all the editing programs or github pages.
+- Resume project and something that could give me ego points if I post to reddit
+- ## As with all personal projects, I hope to learn more about coding, github, and the entire process as a whole; I want to increase my experience.
+
+# ToDo
+- Have adjusted pictures be written to a new directory.
+- Possibly choices to be aligned at different features (hair, eyebrows, leg, torso, etc.).
+- Possibly create and option for in which order they'll be displayed (oldest, latest).
+- Possible create a GUI version
+
+# Contributions
+- I greatly appreciate your interest in this project. Feel free to play around with it and fork to experiment.
+- However, this project is a real learning process for me so until I get a releasable version I won't be merging any pull requests because this is a fairly simple project I think an expert could do in a few days.
+
 
 ## Documentation
 ### "Transformation_FaceMesh_Wip"   
 
+### INCOMPLETE
     
 - This is the going to be the main application for the program. Currently, I have this file as the updated version which is using MediaPipes "FaceMesh" to detect 468 individual points. 
 
@@ -29,3 +47,8 @@
 
 - This is an interesting script which uses the computer's webcame to display the facemesh on the subjects face.
 - This script was a proof of concept and mainly taken from MediaPipes documentation page to see how much more accurate the facemesh model was.
+
+
+
+
+
