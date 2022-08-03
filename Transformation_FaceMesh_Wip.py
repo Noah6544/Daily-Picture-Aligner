@@ -11,8 +11,9 @@ import random
 
 
 ###VARIABLES
-images_path = "C:\\Users\\Noah\'s Marc P. 4648\\Pictures\\DAILY PIC\\Daily Photo\\"
-adjusted_images_path = "C:\\Users\\Noah\'s Marc P. 4648\\Desktop\\ARBOK\\2021\\camera roll picture aligning automation (2021)\\adjustedimages_facemesh\\"
+images_path = "C:\\Users\\Noah\'s Marc P. 4648\\Pictures\\DAILY PIC\\"
+adjusted_images_path = "C:\\CODING\\Github\\Daily-Picture-Aligner\\adjusted_images\\"
+Stabalyzing_point_coordinate_path = "C:\\CODING\\Github\\Daily-Picture-Aligner\\Stabalizing_point_file.txt"
 images_list = []
 translated_list = []
 width, height = 640,360
@@ -31,7 +32,7 @@ x_ylist = []
 
 def find_left_eye(img):
     global left_eye
-    Center_Coordinate_File = open("C:\\Users\\Noah\'s Marc P. 4648\\Desktop\\ARBOK\\2022\\camera roll picture aligning automation (2022)\\Left_eye_mediapipe_file.txt", "w")
+    Center_Coordinate_File = open(Stabalyzing_point_coordinate_path, "w")
     with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=1,refine_landmarks=True,min_detection_confidence=0.5) as face_mesh:
         # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
         results = face_mesh.process(cv.cvtColor(img, cv.COLOR_BGR2RGB))
@@ -56,10 +57,11 @@ def find_left_eye(img):
             for id,landmark in enumerate(face_landmarks.landmark):
                 image_height, image_width, image_c = annotated_image.shape
                 x,y= int(landmark.x*image_width),int(landmark.y*image_height)
-                cv.putText(annotated_image, str(id), (x, y), cv.FONT_HERSHEY_PLAIN, 0.6, (0,0,255), 1)
+                cv.putText(annotated_image, str(id), (x, y), cv.FONT_HERSHEY_PLAIN, 0.8, (255,255,255), )
 
                 face_id_points.append([x,y])
 
+            print(face_id_points[5])
 
             Center_Coordinate_File.write(str(face_id_points[1]))
 
@@ -67,21 +69,13 @@ def find_left_eye(img):
             #image = mp_drawing.draw_detection(annotated_image, detection)
             # shows images on screen.
             cv.imshow("annotated image",annotated_image)
-            cv.waitKey(100)
+            cv.waitKey(0)
             # stores new annotated image in file path
             #cv2.imwrite(store_image_path + str(idx) + '.png', annotated_image)
 
             #return left_eye
 
-def find_eye(image):
-    find_eye = eye_cascade.detectMultiScale(image, 1.3, minNeighbors=5)
-    global left_pupil
-    global right_pupi
-    for (x, y, w, h) in find_eye:
-        left_pupil = int(x + (h / 2))
-        right_pupil = int(y + (w / 2))
-        image = cv.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), 1)
-        image = cv.circle(image,(int(left_pupil),int(right_pupil)),3,(255,255,255),thickness=3)
+
 
 ###PLEASE ASNWER THIS IN THE FUTURE WHY DOES THE CODE FROM ONLINE (TRANSLATE) WORK AND THE ONE I COPIED FROM THE VIDEO DOESN'T!!?!?!
 #I COPIED AND PASTED TRANSLATE BUT IT WORKS AND THE ONE I MANUALLY TYPED DOESN"T''T'"!?!?!!!
@@ -189,7 +183,7 @@ for file in os.listdir(images_path):
 for image in images_list:
 
     print(image)
-    Left_eye_mediapipe_file = open("C:\\Users\\Noah\'s Marc P. 4648\\Desktop\\ARBOK\\2022\\camera roll picture aligning automation (2022)\\Left_eye_mediapipe_file.txt","r")
+    Left_eye_mediapipe_file = open(Stabalyzing_point_coordinate_path)
     xlist = []
     ylist = []
     cv2image = cv.imread(image)
