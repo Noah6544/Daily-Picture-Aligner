@@ -26,8 +26,7 @@ x_ylist = []
 
 
 def find_left_eye(img):
-
-    Left_eye_mediapipe_file = open(_file.txt","w")
+    Left_eye_mediapipe_file = open("file.txt","w")
     with mp_face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.7) as face_detection:
         # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
         results = face_detection.process(cv.cvtColor(img, cv.COLOR_BGR2RGB))
