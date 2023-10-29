@@ -10,8 +10,12 @@ import random
 
 ###VARIABLES
 images_path = "daily"
+daily_photo_path = "C:\\Users\\Noah\'s Marc P. 4648\\Pictures\\FinalDailyPics\\"
 daily_photo_path = "Daily Photo Converted\\"
+
+adjusted_images_path = "C:\\Users\\Noah\'s Marc P. 4648\\Pictures\\FinalDailyPics\\Adjusted\\"
 adjusted_images_path = "adjusted images\\"
+
 mp_face_mesh = mp.solutions.face_mesh
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
@@ -86,8 +90,8 @@ def bruteForceRotation(image,rightEyex,rightEyey):
 			break
 		print(Ydifference)
 		print(rotationAmount)
-		cv.imshow("asdf",rotatedImage)
-		cv.waitKey(10)
+		# cv.imshow("asdf",rotatedImage)
+		# cv.waitKey(10)
   
 	cv.destroyAllWindows()
 
@@ -121,32 +125,37 @@ for file in os.listdir(daily_photo_path):
 	if file in os.listdir(adjusted_images_path):
 		pass
 	else:
-		#endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each file name size is different and the initial start is different. anyways this works currently
+		#endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
 		if file.endswith("g") and os.path.getsize(daily_photo_path + file) > 0 and file != "1871.jpg":
 			cvimage = cv.imread(daily_photo_path + file)
-			#cv2image = cv.resize(cv2image, (width,height))
+			#cv2image = cv.resze(cv2image, (width,height))
 			LeftEyeImageCoordinates = getImageCoordinates(cvimage,468)
 			RightEyeImageCoordinates = getImageCoordinates(cvimage,473)
-			if RightEyeImageCoordinates and LeftEyeImageCoordinates != None: #if successfully found image
+			if RightEyeImageCoordinates and LeftEyeImageCoordinates != None: #if successfullyfound image
 				LeftEyex, LeftEyey = LeftEyeImageCoordinates[0],LeftEyeImageCoordinates[1]
 				RightEyex, RightEyey = RightEyeImageCoordinates[0],RightEyeImageCoordinates[1]
 
 				if landmarkNumber == 468: #if we want the left eye
-					initialx, initialy = BaseImageStats[0][0],BaseImageStats[0][1] #.55 and .34 are arbitary numbers i picked.
+					
+					initialx,initialy = .45*cvimage.shape[1],.5*cvimage.shape[0] #those are % alues of where i want theleft eye to be. about 45% over to the left and 60% up on the sreen.
 					movex = initialx - LeftEyex 
 					movey = initialy - LeftEyey
-					# image = scaleImagetoBaseImage(cvimage,(RightEyex-LeftEyex),BaseImageStats[2][0])
+					# imge = scaleImagetoBaseImage(cvimage,(RightEyex-LeftEyex),BseImageStats[2][0])
 					finalimage = translate(cvimage,movex,movey)
 					print(str(movex) + "move x")
-				elif landmarkNumber == 473: #if we want the right eye
-					initialx, initialy = BaseImageStats[1][0],BaseImageStats[1][1] #.55 and .34 are arbitary numbers i picked.
-					movex = initialx - RightEyex 
-					movey = initialy - Righteyey  
+				elif landmarkNumber == 473: #if we wantthe right eye
+					initialx, initiay = BaseImageStats[1][0],BaseImageStats[1][1] #.5 and .34 are arbitary numbers i picked.
+					move = initialx - Rightyex 
+					movey = initialy - RightEyey  
 					finalimage = translate(cvimage,movex,movey)
 
+
 				# cv.imshow("Newly Aligned Image",finalimage)
-				# cv.waitKey(1)
-				cv.imwrite(adjusted_images_path+file+"_adjusted.jpg",finalimage)
+				# cv.waitKey(100)				added_imag = v2.addWeihted(baseimage,0.4,finalimage,0.1,0)
+				finalimage.resize(200,200)
+				baseimage.resize((200,200))
+				added_image = cv.addWeighted(baseimage,0.4,finalimage,0.1,0)
+				cv.imwrite(file+"_overlayadjusted.jpg",added_image)
 				print("Successfully aligned and wrote to file image: \'" + str(file) +"\' #" + str(count))
 				count += 1
 			
@@ -154,3 +163,5 @@ for file in os.listdir(daily_photo_path):
 				print("No face was found for file: " + file)	
 		else:
 			pass
+
+				
