@@ -1,13 +1,35 @@
-import cv2 as cv
+###IMPORTS
+import os
+import math
 import numpy as np
+import time
 import mediapipe as mp
+import cv2 as cv
+import random
+###IMPORTS
+
+###VARIABLES
+daily_photo_path = "Daily Photo Converted\\"
+
+adjusted_images_path = "adjusted images\\"
+
+adjusted_images_path_aroundpoint = "adjusted images aroundpoint\\"
+
+adjusted_images_path_aroundpoint_translatefirst = "adjusted images aroundpoint translatefirst\\"
+
+
+rotatedimagepath = "rotatedimages\\"
+
+
+
+
+adjusted_images_path_noscale = "adjusted images no scale\\"
+
+mp_face_mesh = mp.solutions.face_mesh
+mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
-mp_face_mesh = mp.solutions.face_mesh
-import shelve
-
-print("Loading up...Hang on...")
-
+drawing_spec = mp_drawing.DrawingSpec(thickness=0, circle_radius=1)
 
 class Image:
     def __init__(self,cvimage):
@@ -67,54 +89,66 @@ class Image:
         self.cvimage = cv.warpAffine(self.cvimage, rot_mat, self.cvimage.shape[1::-1], flags=cv.INTER_LINEAR)
 
 
+ 
+#ToDo: implement a cool "drawing with your eyes." kinda thing
 
-face_id_points = []
-# For webcam input:
-drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
-cap = cv.VideoCapture(1)
-cap.set(cv.CAP_PROP_FRAME_HEIGHT,720)
-cap.set(cv.CAP_PROP_FRAME_WIDTH,1280)
-count = 0 
-with mp_face_mesh.FaceMesh(
-        max_num_faces=2,
-        refine_landmarks=True,
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5) as face_mesh:
-    while cap.isOpened():
-        success, image = cap.read()
-        if not success:
-            print("Ignoring empty camera frame.")
-            # If loading a video, use 'break' instead of 'continue'.
-            continue
-        # To improve performance, optionally mark the image as not writeable to
-        # pass by reference.
-        image.flags.writeable = False
-        landmarkNumber = 468
-        currentFrame = Image(image)
-        if currentFrame.LeftEyeImageCoordinates or currentFrame.RightEyeImageCoordinates != None: #if successfully found image ##CHECK VERSION HISTORY
-            if count == 0:
-                BaseImage = Image(cv.imread("baseimage2.jpg"))
-                count = 1
-            else:
+    def getStats(baseimage):
+ 
+        return ([LeftEyex,LeftEyey],[RightEyex,RightEyey],[Xdifference,Ydifference])
+      
+
+    
+###RUNNING CODE
+
+print("made it here")
+BaseImage = Image(cv.imread("baseimage.jpg"))
+count = 1
+
+landmarkNumber = 468
+#specifically this for loop gets all files and only keeps the ones that are jpg files and aren't curropted or 0 in size.
+for file in os.listdir(daily_photo_path):
+    if file in os.listdir(adjusted_images_path):
+        pass
+    else:
+        #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
+        if file.endswith("g") and os.path.getsize(daily_photo_path + file) > 0 and file != "1871.jpg":
+            currentImage = Image(cv.imread(daily_photo_path + file))
+            # #cv2image = cv.resze(cv2image, (width,height))
+            # LeftEyeImageCoordinates = getImageCoordinates(cvimage,468)
+            # RightEyeImageCoordinates = getImageCoordinates(cvimage,473)
+            if currentImage.RightEyeImageCoordinates and currentImage.LeftEyeImageCoordinates != None: #if successfullyfound image
+                # LeftEyex, LeftEyey = LeftEyeImageCoordinates[0],LeftEyeImageCoordinates[1]
+                # RightEyex, RightEyey = RightEyeImageCoordinates[0],RightEyeImageCoordinates[1]
+
                 if landmarkNumber == 468: #if we want the left eye
+                    
+                    # initialx,initialy = .45*cvimage.shape[1],.5*cvimage.shape[0] #those are % alues of where i want theleft eye to be. about 45% over to the left and 60% up on the sreen.
 
                     initialx,initialy = BaseImage.LeftEyex,BaseImage.LeftEyey
-                    currentFrame.scale_around_point(BaseImage)
-                    currentFrame.refreshEyeCoordinates()
-                    movex = initialx - currentFrame.LeftEyex 
-                    movey = initialy - currentFrame.LeftEyey
-                    currentFrame.translate(movex,movey)
-                    currentFrame.refreshEyeCoordinates()
-                    currentFrame.rotate_image(BaseImage)
-                elif landmarkNumber == 473: #if we want the right eye
-                    movex = initialx - RightEyex 
+                    currentImage.scale_around_point(BaseImage)
+                    currentImage.refreshEyeCoordinates()
+                    movex = initialx - currentImage.LeftEyex 
+                    movey = initialy - currentImage.LeftEyey
+                    currentImage.translate(movex,movey)
+                    currentImage.refreshEyeCoordinates()
+                    currentImage.rotate_image(BaseImage)
+                elif landmarkNumber == 473: #if we want to SHIFT to the right eye
+                    initialx, initiay = BaseImageStats[1][0],BaseImageStats[1][1] #.5 and .34 are arbitary numbers i picked.
+                    move = initialx - Rightyex 
                     movey = initialy - RightEyey  
-                    # image = translate(image,movex,movey)
-        else: 
-            print("No face was found for this frame: ")
+                    finalimage = translate(cvimage,movex,movey)
 
-        # Flip the image horizontally for a selfie-view display.
-        cv.imshow('MediaPipe Face Mesh', currentFrame.cvimage)  #THIS FLIP, if you're trying to find landmarks, take this into consideration.
-        if cv.waitKey(1) & 0xFF == 27:
-            break
-cap.release()
+
+                # cv.imshow("Newly Aligned Image",finalimage)
+                # cv.waitKey(100)               added_imag = v2.addWeihted(baseimage,0.4,finalimage,0.1,0)
+                
+                cv.imwrite(rotatedimagepath+file+"_adjustedandscaled.jpg",currentImage.cvimage)
+                print("Successfully aligned and wrote to file image: \'" + str(file) +"\' #" + str(count))
+                count += 1
+            
+            else: 
+                print("No face was found for file: " + file)    
+        else:
+            pass
+
+                
