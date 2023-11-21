@@ -1,7 +1,7 @@
 # Daily-Picture-Aligner
 *looking for a more updated, working version? Checkout the development branch! It's not ready for user input, so you'll have to do some modification of the python file itself, but you can align photos there!*
 <br><br>
- [Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/choppedprephone.gif)
+ ![Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/choppedprephone.gif)
 
 This program is intended to take all photos in a folder and align them automatically based on the eye coordinates of a set base image.
 This project is using opencv to handle opening, displaying, and translating images. MediaPipe provides 468 facial landmarks to extract and calculate with.
