@@ -26,7 +26,6 @@ class Image:
             # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
             results = face_mesh.process(cv.cvtColor(self.cvimage, cv.COLOR_BGR2RGB))
             if not results.multi_face_landmarks: #if there are no face landmarks detected it will ignore.
-                print('no faces')
                 return None
             # Print and draw face mesh landmarks on image.
             for face_landmarks in results.multi_face_landmarks:     
@@ -38,16 +37,15 @@ class Image:
                     else:
                         pass
 
+
     def refreshEyeCoordinates(self): #this is needed because after the transformations, the eye locations change!
-        self.LeftEyeImageCoordinates = self.getImageCoordinates(468)
-        self.RightEyeImageCoordinates = self.getImageCoordinates(473)
+        self.LeftEyeImageCoordinates = self.getImageCoordinates(468) #for the webcam alignment, this is horrendously slow. like 2fps.
+        self.RightEyeImageCoordinates = self.getImageCoordinates(473) #and then to make it worse, we do it again for another eye.
         self.LeftEyex, self.LeftEyey = self.LeftEyeImageCoordinates[0],self.LeftEyeImageCoordinates[1]
         self.RightEyex, self.RightEyey = self.RightEyeImageCoordinates[0],self.RightEyeImageCoordinates[1]
 
 
-
-    def scale_around_point(self, BaseImage): #this function scales the image by a calculated scalefactor to remove and differences in camera distance.
-
+    def scaleAroundPoint(self, BaseImage): #this function scales the image by a calculated scalefactor to remove and differences in camera distance.
         point = (BaseImage.LeftEyex,BaseImage.LeftEyey) 
         scaleFactor = (BaseImage.Xdifference/self.Xdifference) #a very simply formula i came up with, wasn't my first iteration, but it works now. I'm saying that like it's complex math, its literally a fraction ratio
         center = (self.Width , self.Height)
@@ -55,25 +53,43 @@ class Image:
         Matrix = cv.getRotationMatrix2D(center, 0, scaleFactor) #I was looking for a way to scale around an image for so long, it was so simple. 
         self.cvimage = cv.warpAffine(self.cvimage, Matrix, (self.Width, self.Height))
 
+    def rotateImage(self,BaseImage): #this function rotates the image so that the slope of the eyes will align with the slope of the base image, if that makes sense. if it doesn't it just makes it better trust me.
+        eyePoint = (BaseImage.LeftEyex,BaseImage.LeftEyey)
+
+        angle = np.rad2deg(np.arctan((self.RightEyey-BaseImage.RightEyey)/(self.Xdifference)))
+        rot_mat = cv.getRotationMatrix2D(eyePoint, angle, 1.0)
+        self.cvimage = cv.warpAffine(self.cvimage, rot_mat, (BaseImage.Width,BaseImage.Height),cv.INTER_AREA) #INTER_AREA preserves quality and removes moire pattern?
+
+
     def translate(self, x, y): #this function simply shifts the image so that the left eye aligns with the base images left eye.
         transMat = np.float32([[1,0,x],[0,1,y]])
         dimensions = (self.cvimage.shape[1], self.cvimage.shape[0])
+        self.LeftEyex += x 
+        self.LeftEyey += y
+        self.RightEyex += x
+        self.RightEyey += y #manually updating them because it'll save some computational time in refreshing the iamges.
         self.cvimage = cv.warpAffine(self.cvimage, transMat, dimensions)
 
 
-    def rotate_image(self,BaseImage): #this function rotates the image so that the slope of the eyes will align with the slope of the base image, if that makes sense. if it doesn't it just makes it better trust me.
-        angle = np.rad2deg(np.arctan((self.RightEyey-BaseImage.RightEyey)/(self.Xdifference)))
-        rot_mat = cv.getRotationMatrix2D((BaseImage.LeftEyex,BaseImage.LeftEyey), angle, 1.0)
-        self.cvimage = cv.warpAffine(self.cvimage, rot_mat, self.cvimage.shape[1::-1], flags=cv.INTER_LINEAR)
+    def alignImagetoBaseImage(self,BaseImage):
+        initialx,initialy = BaseImage.LeftEyex,BaseImage.LeftEyey
+        self.scaleAroundPoint(BaseImage)
+        self.refreshEyeCoordinates()
+        movex = initialx - self.LeftEyex 
+        movey = initialy - self.LeftEyey
+        self.translate(movex,movey)
+        self.rotateImage(BaseImage)
 
 
 
 face_id_points = []
 # For webcam input:
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
-cap = cv.VideoCapture(1)
-cap.set(cv.CAP_PROP_FRAME_HEIGHT,720)
-cap.set(cv.CAP_PROP_FRAME_WIDTH,1280)
+cap = cv.VideoCapture(0, cv.CAP_DSHOW)
+BaseImage = Image(cv.imread("BaseImages/baseimage2.jpg"))
+
+cap.set(cv.CAP_PROP_FRAME_HEIGHT,4000)
+cap.set(cv.CAP_PROP_FRAME_WIDTH,4000)
 count = 0 
 with mp_face_mesh.FaceMesh(
         max_num_faces=2,
@@ -90,31 +106,23 @@ with mp_face_mesh.FaceMesh(
         # pass by reference.
         image.flags.writeable = False
         landmarkNumber = 468
-        currentFrame = Image(image)
-        if currentFrame.LeftEyeImageCoordinates or currentFrame.RightEyeImageCoordinates != None: #if successfully found image ##CHECK VERSION HISTORY
-            if count == 0:
-                BaseImage = Image(cv.imread("baseimage2.jpg"))
-                count = 1
-            else:
-                if landmarkNumber == 468: #if we want the left eye
+        try:
+            currentFrame = Image(image)
+            if currentFrame.LeftEyeImageCoordinates or currentFrame.RightEyeImageCoordinates != None: #if successfully found image ##CHECK VERSION HISTORY
+                if count == 0:
+                    count = 1
+                else:
+                    if landmarkNumber == 468: #if we want the left eye
+                        currentFrame.alignImagetoBaseImage(BaseImage)
+                    elif landmarkNumber == 473: #if we want the right eye
+                       currentFrame.alignImagetoBaseImage(BaseImage)
 
-                    initialx,initialy = BaseImage.LeftEyex,BaseImage.LeftEyey
-                    currentFrame.scale_around_point(BaseImage)
-                    currentFrame.refreshEyeCoordinates()
-                    movex = initialx - currentFrame.LeftEyex 
-                    movey = initialy - currentFrame.LeftEyey
-                    currentFrame.translate(movex,movey)
-                    currentFrame.refreshEyeCoordinates()
-                    currentFrame.rotate_image(BaseImage)
-                elif landmarkNumber == 473: #if we want the right eye
-                    movex = initialx - RightEyex 
-                    movey = initialy - RightEyey  
-                    # image = translate(image,movex,movey)
-        else: 
-            print("No face was found for this frame: ")
-
-        # Flip the image horizontally for a selfie-view display.
-        cv.imshow('MediaPipe Face Mesh', currentFrame.cvimage)  #THIS FLIP, if you're trying to find landmarks, take this into consideration.
-        if cv.waitKey(1) & 0xFF == 27:
-            break
+            # Flip the image horizontally for a selfie-view display.
+            cv.imshow('MediaPipe Face Mesh', currentFrame.cvimage)  #THIS FLIP, if you're trying to find landmarks, take this into consideration.
+            if cv.waitKey(1) & 0xFF == 27:
+                break
+        except Exception as error:
+            print("No face detected." + str(error))
+            if cv.waitKey(1) & 0xFF == 27:
+                break
 cap.release()
