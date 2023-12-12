@@ -38,7 +38,7 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
   - "Base Images" are provided in the base images folder. These are images that have ideal face position and scale, all other images of the same resolution (i.e: 1920x1080, 1280x720, etc.) will be aligned to this image. 
 ### 2. Script:
    ### First Alignment:
-  - The script creates a "BaseImage" object instance for every image in the "BaseImage" folder. Each BaseImage is then "aligned" to the BaseImage that has the smallest resolution out of all other BaseImages. The smallest BaseImage is referred to as the "UltimateBaseImage" within the code. The alignment isn't actually done, instead, the data for each transformation is stored for later. [Why?](https://github.com/Noah6544/Daily-Picture-Aligner/tree/Development#reasoning)
+  - The script creates a "BaseImage" object instance for every image in the "BaseImage" folder. Each BaseImage is then "aligned" to the BaseImage that has the smallest resolution out of all other BaseImages. The smallest BaseImage is referred to as the "UltimateBaseImage" within the code. The alignment isn't actually done, instead, the data for each transformation is stored for later. [Why?](https://github.com/Noah6544/Daily-Picture-Aligner#reasoning)
   - Each image inside "DailyPhotos" gets aligned to is corresponding BaseImage (one that has the same resolution).
   ### Second Alignment:
   
