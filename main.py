@@ -16,9 +16,12 @@ parser = argparse.ArgumentParser(
 arguments = parser.parse_args()
 
 ###VARIABLES
-DailyPhotoPath = "ALL Daily photos/"
-BaseImagePath = "./BaseImages/"
-OutputPath = "AlignedPhotos/"
+DailyPhotoPath = "./DailyPhotos/"# "ALL Daily photos/"
+BaseImagePath = "./BaseImages/" # "./BaseImages/"
+OutputPath = "./AlignedPhotos/"
+fileAffix = "_ScaleRotateTranslate.jpg"
+fileSuffix = ""
+
 
 class FileManager: #toDO: find a better classname for the filemanager
     def __init__(self,file):
@@ -47,16 +50,18 @@ BaseImageDictionary = {i: BaseImageDictionary[i] for i in Keys} #this is a rough
 UltimateBaseImageShape = list(BaseImageDictionary)[0] #if the dictionary above sorted correctly, the first shape will be the dimensions of the smallest image
 #now that we have a way to index the actual base image, we need to take all the others and store their translations
 for index, (shape,BaseImage) in enumerate(BaseImageDictionary.items()):
-    if index == 0:w
+    if index == 0:
         UltimateBaseImage = BaseImageDictionary.get(UltimateBaseImageShape) 
-        print(UltimateBaseImage.cvimage.shape)
+        print(UltimateBaseImage.cvimage.shape,"fasdhflaksjdhfakjshfdlj!")
     else:
-        BaseImage.getAlignmentInfo(UltimateBaseImage)
+        pass
+        print("getting alignment info for this baseimage: ",BaseImage.name)
+        BaseImage.getAlignmentInfo(UltimateBaseImage) 
 
 ###RUNNING CODE
 
-count = 1
-
+print("\n---------------\nSTARTING SCRIPT\n--------------\n")
+count = 0
 fileList = os.listdir(DailyPhotoPath)
 # fileListSorted = fileList.sort(key=lambda x: os.path.getctime(x))
 fileListSorted = list(sorted(Path(DailyPhotoPath).iterdir(), key=os.path.getmtime))
@@ -64,26 +69,44 @@ fileListSorted = list(sorted(Path(DailyPhotoPath).iterdir(), key=os.path.getmtim
 for file in fileListSorted:
     libfile = file
     file = file.name #Pathlib returns it as a pathlib.WindowsPath instead of a string, and it returns the parent folder like this: parentfolder/file.jpg, so we need to convert it back into a string for the logic ahead using file.name, just the file name as string
-    if file in os.listdir(OutputPath): #if our file has already been aligned, do nothing.
+    if fileSuffix+file+fileAffix in os.listdir(OutputPath): #if our file has already been aligned, do nothing.
         pass
     else:
         #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
-        if file.endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0 and file != "1871.jpg":
+        if file.lower().endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0 and file != "1871.jpg":
             currentImage = classes.Image(libfile)
-            if currentImage.RightEyeImageCoordinates and currentImage.LeftEyeImageCoordinates != None: #if successfully found face in image
-                CoorespondingBaseImage = BaseImageDictionary.get(currentImage.cvimage.shape) #each image is aligned to the baseimage with the same dimensions, then we'll take all those aligned images and align them AGAIN based on the baseimage's alignment. this way, even if there are errors in alignment, they'll be the same and look aligned.
+            #consider taking away the walrus operator cuz its only python 3.8.0+
+            if len(BaseImageDictionary) > 1: #if there's more than one picture as a baseimage:
+                if (CoorespondingBaseImage := BaseImageDictionary.get(currentImage.cvimage.shape[:2])) != None: #each image is aligned to the baseimage with the same dimensions, then we'll take all those aligned images and align them AGAIN based on the baseimage's alignment. this way, even if there are errors in alignment, they'll be the same and look aligned.
+                    pass 
+                else: #
+                    print("No Cooresponding BaseImage provided for '",file," '. Using default instead.")
+                    CoorespondingBaseImage = UltimateBaseImage
+
+                print(UltimateBaseImage.cvimage.shape,"ultimate")
+                print(currentImage.cvimage.shape,"curreintimage")
                 success = currentImage.alignImagetoBaseImage(CoorespondingBaseImage) #1st alignent to baseimage
-                success = currentImage.alignImagetoUltimateBaseImage(CoorespondingBaseImage)  #2nd/final alignent to ultimatebaseimage using the correspoinding base image's stats for continuity.        
+                if currentImage.Dimensions == UltimateBaseImage.Dimensions: #if this image's base image IS the ultimatebase image
+                    pass
+                else: 
+                    pass
+                    # success = currentImage.alignImagetoUltimateBaseImage(CoorespondingBaseImage)  #wacky rotation and error at img 240 #2nd/final alignent to ultimatebaseimage using the correspoinding base image's stats for continuity.        
                 if success:
-                    cv.imwrite(OutputPath+str(count)+"___"+file+"___ScaleRotateTranslate.jpg",currentImage.cvimage)
-                    print("Successfully aligned and wrote to file image: \'" + str(file) +"\' #" + str(count))
+                    cv.imwrite(OutputPath+fileSuffix+file+fileAffix,currentImage.cvimage)
+                    print("Successfully aligned and wrote to file image: " + str(file))
                     count += 1
                 else:
-                    print("passing")
-            
-            else: 
-                print("No face was found for file: " + file)  
+                    print("Ran into an error, didn't write " + str(file))
 
+            else: #if there's only 1 base image photo:
+                success = currentImage.alignImagetoBaseImage(UltimateBaseImage)
+                if success:
+                    cv.imwrite(OutputPath+fileSuffix+file+fileAffix,currentImage.cvimage)
+                    print("Successfully aligned and wrote to file image: \'" + str(file) +"\' #" + str(count))
+                    count+=1
+                else:
+                    print("Ran into an error, didn't write " + str(file))       
+       
         else:
             pass
 print("\n~~~~~~~~~~~\nSuccessfully Aligned " + str(count) +" Pictures!")
