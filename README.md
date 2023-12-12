@@ -7,7 +7,7 @@ Have you wanted to create one of those daily picture videos, but you didn't want
 <div align=center>
   
 ### Personal Daily Photos:
-![Personal Daily Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/Development/RecentDailyGif.gif)
+![Personal Daily Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/RecentDailyGif.gif)
 
 ### Unaligned Random Faces:
 ![Unaligned Random Faces](https://github.com/Noah6544/Daily-Picture-Aligner/blob/Development/Demos/UnalignedRandomFaces.gif)
