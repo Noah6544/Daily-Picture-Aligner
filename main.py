@@ -1,10 +1,13 @@
 import os
+import sys
 import numpy as np
 import mediapipe as mp
 import cv2 as cv
 from pathlib import *
 import argparse
 import classes 
+import time
+from tqdm import tqdm, trange
 
 
 
@@ -60,13 +63,14 @@ for index, (shape,BaseImage) in enumerate(BaseImageDictionary.items()):
 
 ###RUNNING CODE
 
-print("\n---------------\nSTARTING SCRIPT\n--------------\n")
+print("\n-------------------------------\nStarting Script\nAdjusting Images\nWriting Files\nCheck 'AlignedPhotos' folder and make sure the script is working\nCheck ErrorLog.txt if output isn't working as expected!\n(Make sure you have 1 image in the 'BaseImages' folder, all images are aligned to this image\n-------------------------------\n")
+time.sleep(5)
 count = 0
 fileList = os.listdir(DailyPhotoPath)
 # fileListSorted = fileList.sort(key=lambda x: os.path.getctime(x))
 fileListSorted = list(sorted(Path(DailyPhotoPath).iterdir(), key=os.path.getmtime))
 #specifically this for loop gets all files and only keeps the ones that are jpg files and aren't curropted or 0 in size.
-for file in fileListSorted:
+for file in tqdm(fileListSorted):
     libfile = file
     file = file.name #Pathlib returns it as a pathlib.WindowsPath instead of a string, and it returns the parent folder like this: parentfolder/file.jpg, so we need to convert it back into a string for the logic ahead using file.name, just the file name as string
     if fileSuffix+file+fileAffix in os.listdir(OutputPath): #if our file has already been aligned, do nothing.
@@ -85,7 +89,7 @@ for file in fileListSorted:
 
                 print(UltimateBaseImage.cvimage.shape,"ultimate")
                 print(currentImage.cvimage.shape,"curreintimage")
-                success = currentImage.alignImagetoBaseImage(CoorespondingBaseImage) #1st alignent to baseimage
+                success = currentImage.alignImagetoBaseImage(CoorespondingBaseImage) #Align to BaseImage
                 if currentImage.Dimensions == UltimateBaseImage.Dimensions: #if this image's base image IS the ultimatebase image
                     pass
                 else: 
@@ -93,21 +97,19 @@ for file in fileListSorted:
                     # success = currentImage.alignImagetoUltimateBaseImage(CoorespondingBaseImage)  #wacky rotation and error at img 240 #2nd/final alignent to ultimatebaseimage using the correspoinding base image's stats for continuity.        
                 if success:
                     cv.imwrite(OutputPath+fileSuffix+file+fileAffix,currentImage.cvimage)
-                    print("Successfully aligned and wrote to file image: " + str(file))
                     count += 1
                 else:
-                    print("Ran into an error, didn't write " + str(file))
+                    pass #handling errors in classes.py
 
             else: #if there's only 1 base image photo:
                 success = currentImage.alignImagetoBaseImage(UltimateBaseImage)
                 if success:
                     cv.imwrite(OutputPath+fileSuffix+file+fileAffix,currentImage.cvimage)
-                    print("Successfully aligned and wrote to file image: \'" + str(file) +"\' #" + str(count))
                     count+=1
                 else:
-                    print("Ran into an error, didn't write " + str(file))       
+                    pass #handling errors in classes.py
        
         else:
             pass
-print("\n~~~~~~~~~~~\nSuccessfully Aligned " + str(count) +" Pictures!")
+print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback!")
                 
