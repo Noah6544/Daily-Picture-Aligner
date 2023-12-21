@@ -7,14 +7,14 @@ Have you wanted to create one of those daily picture videos, but you didn't want
 <div align=center>
   
 ### Personal Daily Photos:
-![Personal Daily Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/RecentDailyGif.gif)
+![Personal Daily Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/Demos/RecentDailyGif.gif)
 
 ### Unaligned Random Faces:
-![Unaligned Random Faces](https://github.com/Noah6544/Daily-Picture-Aligner/blob/Development/Demos/UnalignedRandomFaces.gif)
+![Unaligned Random Faces](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/Demos/UnalignedRandomFaces.gif)
 
 
 ### Aligned Random Faces: 
-![Aligned Random Faces](https://github.com/Noah6544/Daily-Picture-Aligner/blob/Development/Demos/AlignedRandomFaces.gif)
+![Aligned Random Faces](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/Demos/AlignedRandomFaces.gif)
 
 </div>
 
