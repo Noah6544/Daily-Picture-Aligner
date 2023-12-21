@@ -1,6 +1,6 @@
 
 ## Daily Picture Aligner
-Have you wanted to create one of those daily picture videos, but you didn't want to align each picture? Well, now you don't have to. Align ~~hundreds~~ _thousands_ of picture automatically.
+Have you wanted to create one of those daily picture videos, but you didn't want to align each picture? Well, now you don't have to. Align ~~hundreds~~ _thousands_ of pictures automatically.
 
 ## Demos: 
  
