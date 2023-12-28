@@ -43,10 +43,8 @@ print("\n-------------------------------\nStarting Script\nAdjusting Images\nWri
 time.sleep(5)
 count = 1
 fileList = os.listdir(DailyPhotoPath)
-print(fileList)
 # fileListSorted = fileList.sort(key=lambda x: os.path.getctime(x))
 fileListSorted = list(sorted(Path(DailyPhotoPath).iterdir(), key=os.path.getctime))
-print(fileListSorted)
 
 #specifically this for loop gets all files and only keeps the ones that are jpg files and aren't curropted or 0 in size.
 for file in tqdm(fileListSorted):
@@ -69,4 +67,4 @@ for file in tqdm(fileListSorted):
         else:
             pass
 print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! If you want to directly support my future (college, projects, etc.), my CashApp is $ANoahBuchanan.")
-                
+input("Press Enter to exit: ")

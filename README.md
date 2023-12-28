@@ -1,6 +1,6 @@
 
 ## Daily Picture Aligner
-Have you wanted to create one of those daily picture videos, but you didn't want to align each picture? Well, now you don't have to. Align ~~hundreds~~ _thousands_ of pictures automatically.
+Have you wanted to create one of those daily picture videos, but you didn't want to align each picture? Well, now you don't have to. Align ~~hundreds~~ _thousands_ of pictures automatically. No sifting through documentation and no coding knowledge necessary, simply run an executable and enjoy your aligned photos.
 
 ## Demos: 
  
@@ -19,23 +19,23 @@ Have you wanted to create one of those daily picture videos, but you didn't want
 </div>
 
 ## Description
-The project was birthed from [Hugo Cornellier's video taking a picture everyday from age 12 until he was married](https://www.youtube.com/watch?v=65nfbW-27ps)
-
-#### !!Current State!!:
-- *In this version, alignments are working well and accurately, even when images are scaled from larger dimenstions (e.g. 3000x3000) to smaller dimensions (1920x1080). This is iPhone -> Mobile Webcam*
+The project was birthed from [Hugo Cornellier's video taking a picture everyday from age 12 until he was married.](https://www.youtube.com/watch?v=65nfbW-27ps) Hugo manually aligned thousands of pictures by hand. While he had the precision he sought, he lost  valuable time (not to say his finished product wasn't worth it, it is incredible!). This project automates the countless hours you will otherwise spend editing each individual photo. While another solution exists: Matthew's <a href="https://github.com/matthewearl/photo-a-day-aligner">'photo a day aligner,'</a> I feel this project is more user friendly (less complex and versatile), as non-programmers can quickly get it up and running by dragging some photos in a few folders, and running a simple executable. Plus, there's no dealing with dlib, as its installation is <ins>**UNFATHOMABLY**</ins> troublesome for myself and others, but I'll digress from the bad memories.
 
 ## Running:
-1. Put some images into the DailyPhotos Folder.
-2. For every unique resolution, choose 1 photo and copy it into the BaseImage folder (i.e you have images that are either 1920x1080, 1280x720, 3000x2000, choose 1 of each type and put it into BaseImages folder)
-3. Run main.py!
-4. Check the output! If there's some funky stuff, see known issues, and check the error.txt file.
-5. Make an image sequence video or a gif!
+### *If you're not a programmer, skip to step 4: simply run the main.exe*
+1. Install python then requirments.txt.
+2. Put some images into the DailyPhotos Folder.
+3. Choose 1 photo where the face is ideal (scale, position, rotation) and copy it into the BaseImage folder. This image should be the smallest resolution you have, as images being scaled down appears better than images scaled up (e.g. if you have 2 3000x3000 pictures, 5 pictures 1920x1080 pictures, and 3 pictures 1280x720, choose one that is 1280x720).
+4. Run main.py as admin! Alternatively, if you're not as familiar with python/programming run the main.exe file.
+5. Quickly check the output using slideshow.py/slideshow.exe in 'misc' folder. If there's some funky stuff, see known issues, and check the error.txt file.
+6. Make an image sequence video or a gif!
 
 ## How it works (Overview)
 
-### 1. Preparation:
+### 1. Preparation: 
   - Photos are placed in the "DailyPhotos" folder. The face that is to be aligned should be in the center of the image.
-  - ***<ins>One</ins>*** BaseImage is  provided in the base images folder. This image should have desired face position and scale, as all other images will be aligned to this image.
+  - ***<ins>One</ins>*** BaseImage is provided in the base images folder. This image should have desired face position and scale, as all other images will be aligned to this image.
+  - Delete all "DELETETHIS.txt" files. They are simply placeholders so folders are created for you.
 
 ### 2. Script:
    ### Alignment Process:
@@ -46,14 +46,15 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
 
 ## Known Issues:
 - Sometimes, there are just some images that simply don't like getting aligned properly. I found that about 2% of my photos (out of ~300) do  this for some reason. Just delete them and keep it pushing honestly.
+- Similarly, the script will sometimes lock onto another face in the image, this happens sometimes, if it does, delete that image as it will continually make the same mistake over and over. But if your face is in the center and most prominent, it seems to do just fine. I'm working on implementing a searching method to only work on the desired face as I enjoy taking pictures spontaneously with friends and siblings and it's unfortunate to have to omit those photos.
 - The current classes.py and main.py likely has some unused code. Previous code regarding the multiple alignments hasn't been cleaned yet.
 
   
 ## Other files:
 - #### webcam_facemesh.py:
-- This file was made to see the transformations live as I was working on functions. It made it easier, and it was kind of cool to see.
+- This script was made to see the transformations live as I was working on functions. It made it easier, and it was kind of cool to see.
 - ### slideshow.py:
-- This file was made to see the finished product of the AlignedPhotos without having to go onto a gifmaker site or some opensource gif maker. Quick and easy to see how it looks.
+- This script was made to see the finished product of the AlignedPhotos without having to go onto a gifmaker site or some opensource gif maker. Quick and easy to see how it looks.
 - Paste in the desired path to photos, then enter the desired waitkey (delay), shorter is faster.
 
 ## Contributing:
