@@ -1,6 +1,6 @@
 
 ## Daily Picture Aligner
-Have you wanted to create one of those daily picture videos, but you didn't want to align each picture? Well, now you don't have to. Align ~~hundreds~~ _thousands_ of pictures automatically. No sifting through documentation and no coding knowledge necessary, simply run an executable and enjoy your aligned photos.
+Have you wanted to create one of those daily picture videos, but you didn't want to align each picture? Well, now you don't have to. Align ~~hundreds~~ _thousands_ of pictures automatically. No sifting through documentation and no coding knowledge necessary, simply run one script and enjoy your aligned photos.
 
 ## Demos: 
  
@@ -19,16 +19,17 @@ Have you wanted to create one of those daily picture videos, but you didn't want
 </div>
 
 ## Description
-The project was birthed from [Hugo Cornellier's video taking a picture everyday from age 12 until he was married.](https://www.youtube.com/watch?v=65nfbW-27ps) Hugo manually aligned thousands of pictures by hand. While he had the precision he sought, he lost  valuable time (not to say his finished product wasn't worth it, it is incredible!). This project automates the countless hours you will otherwise spend editing each individual photo. While another solution exists: Matthew's <a href="https://github.com/matthewearl/photo-a-day-aligner">'photo a day aligner,'</a> I feel this project is more user friendly (less complex and versatile), as non-programmers can quickly get it up and running by dragging some photos in a few folders, and running a simple executable. Plus, there's no dealing with dlib, as its installation is <ins>**UNFATHOMABLY**</ins> troublesome for myself and others, but I'll digress from the bad memories.
+The project was birthed from [Hugo Cornellier's video taking a picture everyday from age 12 until he was married.](https://www.youtube.com/watch?v=65nfbW-27ps) Hugo manually aligned thousands of pictures by hand. While he had the precision he sought, he lost  valuable time (not to say his finished product wasn't worth it, it is incredible!). This project automates the countless hours you will otherwise spend editing each individual photo. While another solution exists: Matthew's <a href="https://github.com/matthewearl/photo-a-day-aligner">'photo a day aligner,'</a> I feel this project is more user friendly (less complex and versatile), as non-programmers can quickly get it up and running by dragging some photos in a few folders, and running a script. Plus, there's no dealing with dlib, as its installation is <ins>**UNFATHOMABLY**</ins> troublesome for myself and others, but I'll digress from the bad memories.
 
 ## Running:
-### *If you're not a programmer, skip to step 4: simply run the main.exe*
-1. Install python then requirments.txt.
+### *I'm working on implementing a functional executable soon for non-programmers*
+1. Install python then requirements.txt.
 2. Put some images into the DailyPhotos Folder.
 3. Choose 1 photo where the face is ideal (scale, position, rotation) and copy it into the BaseImage folder. This image should be the smallest resolution you have, as images being scaled down appears better than images scaled up (e.g. if you have 2 3000x3000 pictures, 5 pictures 1920x1080 pictures, and 3 pictures 1280x720, choose one that is 1280x720).
-4. Run main.py as admin! Alternatively, if you're not as familiar with python/programming run the main.exe file.
+4. Run main.py! Alternatively, if you're not as familiar with python, skip to #7.
 5. Quickly check the output using slideshow.py/slideshow.exe in 'misc' folder. If there's some funky stuff, see known issues, and check the error.txt file.
 6. Make an image sequence video or a gif!
+7. Check out (my quick guide video)[] on how to run this project if you need help or want to see a demo.
 
 ## How it works (Overview)
 
@@ -61,8 +62,10 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
 - Woa, you want to contribute, eh? Thanks, that means a lot! Feel free to write a pull request or reach out to me for any questions or ideas!
 - A few ideas I want to implement that I'm not sure how to in case you'd like to implement them!
    1. Basic GUI to make this program more accessible to people who don't know how to run python scripts
-   2. In depth error messages for the error.txt file.
+   2. Handling multiple faces by aligning to the same face everytime (to avoid getting into ML and face recognition which might make the 'bundle size' a lot larger, I was thinking of implementing a basic crop to the center of each image, extrapolating the transformation data, then 'uncropping' in the finished file. I think this would be efficient and 95% effective).
+   3. In depth error messages for the error.txt file.
+   4. I tried to create an executable using pyinstaller, but I can't get the dependencies to work properly, I think that's a good first issue on this project!
   
 ## Final Thoughts:
 - If you found this project useful, or interesting, please reach out to me!! This project has been my passion project and it's been a direct representation of my coding growth over the years. I'd love to see how you'd like to use it.
-- If you *really* found this project helpful, if you'd like to support me and this project, my CashApp is $ANoahBuchanan!
+- If you *really* found this project helpful, if you'd like to support me and this project, my CashApp is $ANoahBuchanan ;)
