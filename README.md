@@ -22,14 +22,14 @@ Have you wanted to create one of those daily picture videos, but you didn't want
 The project was birthed from [Hugo Cornellier's video taking a picture everyday from age 12 until he was married.](https://www.youtube.com/watch?v=65nfbW-27ps) Hugo manually aligned thousands of pictures by hand. While he had the precision he sought, he lost  valuable time (not to say his finished product wasn't worth it, it is incredible!). This project automates the countless hours you will otherwise spend editing each individual photo. While another solution exists: Matthew's <a href="https://github.com/matthewearl/photo-a-day-aligner">'photo a day aligner,'</a> I feel this project is more user friendly (less complex and versatile), as non-programmers can quickly get it up and running by dragging some photos in a few folders, and running a script. Plus, there's no dealing with dlib, as its installation is <ins>**UNFATHOMABLY**</ins> troublesome for myself and others, but I'll digress from the bad memories.
 
 ## Running:
-### *I'm working on implementing a functional executable soon for non-programmers*
+#### *I'm working on implementing a functional executable soon for non-programmers.*
 1. Install python then requirements.txt.
 2. Put some images into the DailyPhotos Folder.
 3. Choose 1 photo where the face is ideal (scale, position, rotation) and copy it into the BaseImage folder. This image should be the smallest resolution you have, as images being scaled down appears better than images scaled up (e.g. if you have 2 3000x3000 pictures, 5 pictures 1920x1080 pictures, and 3 pictures 1280x720, choose one that is 1280x720).
 4. Run main.py! Alternatively, if you're not as familiar with python, skip to #7.
 5. Quickly check the output using slideshow.py/slideshow.exe in 'misc' folder. If there's some funky stuff, see known issues, and check the error.txt file.
 6. Make an image sequence video or a gif!
-7. Check out (my quick guide video)[] on how to run this project if you need help or want to see a demo.
+7. Check out [my quick guide video](https://www.youtube.com/watch?v=_ow6GLv7VSA&) on how to run this project if you need help or want to see a demo.
 
 ## How it works (Overview)
 
