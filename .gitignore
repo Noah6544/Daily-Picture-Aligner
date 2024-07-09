@@ -1,0 +1,12 @@
+__pycache__
+
+/ErrorLog.txt
+
+AlignedPhotos/**
+!AlignedPhotos/DELETETHIS.txt
+
+BaseImages/**
+!BaseImages/DELETETHIS.txt
+
+DailyPhotos/**
+!DailyPhotos/DELETETHIS.txt
