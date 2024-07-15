@@ -23,7 +23,7 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
 
 ## Running:
 #### *I'm working on implementing a functional executable soon for non-programmers.*
-1. Install python then requirements.txt.
+1. Install python ([a version supported by mediapipe](https://ai.google.dev/edge/mediapipe/solutions/setup_python) and 64bit) then requirements.txt.
 2. Put some images into the DailyPhotos Folder.
 3. Choose 1 photo where the face is ideal (scale, position, rotation) and copy it into the BaseImage folder. This image should be the smallest resolution you have, as images being scaled down appears better than images scaled up (e.g. if you have 2 3000x3000 pictures, 5 pictures 1920x1080 pictures, and 3 pictures 1280x720, choose one that is 1280x720).
 4. Run main.py! Alternatively, if you're not as familiar with python, skip to #7.
