@@ -1,4 +1,5 @@
 import os
+import pathlib
 import sys
 import numpy as np
 import mediapipe as mp
@@ -9,28 +10,27 @@ import classes
 import time
 from tqdm import tqdm, trange
 
-
-
-
-# if __name__ == "__main__": # today (11/24/23) i finally understood what this does when trying to use main as a package in terminal
 parser = argparse.ArgumentParser(
     prog='Daily Picture Aligner',
     description = "Automate the eye coordinate alignment process (scaling, rotating, translating) of hundreds of photo to an initial image. ")
-arguments = parser.parse_args()
+parser.add_argument('--photos', default='./DailyPhotos/')
+parser.add_argument('--output', default='./AlignedPhotos/')
+parser.add_argument('--baseimage', default='./BaseImages/')
+parser.add_argument('-c', '--confidence', default=0.2, help='Confidence level for detecting faces (0.0 - 1.0')
+parser.add_argument('-s', '--skip-existing', action='store_true', help='Skip already aligned images in output folder')
+parser.add_argument('-b', '--add-blur', action='store_true', help='Adds a background blur to empty areas')
+args = parser.parse_args()
 
-###VARIABLES
-DailyPhotoPath = "./DailyPhotos/"# "ALL Daily photos/"
-BaseImagePath = "./BaseImages/" # "./BaseImages/"
-OutputPath = "./AlignedPhotos/"
-fileAffix = "_Aligned.jpg"
-fileSuffix = "_"
+### VARIABLES ###
+OUT_EXT = ".png" # using png as it's a common lossless format with transparency
+IMAGE_EXT = ['.png', '.jpg', '.jpeg', '.tiff', '.bmp']
+#################
 
-
-class FileManager: #toDO: find a better classname for the filemanager
+class FileManager: # TODO: find a better classname for the filemanager
     def __init__(self,file):
         self.file 
 
-files = os.listdir(Path(BaseImagePath))
+files = os.listdir(Path(args.baseimage))
 files = list(filter(lambda a: not a.startswith("."), files))
 
 if len(files) > 1:
@@ -38,37 +38,49 @@ if len(files) > 1:
 
 file = files[0]
 
-libfile = PurePath(BaseImagePath+file)
-BaseImage = classes.BaseImage(libfile)
+lib_file = PurePath(args.baseimage + file)
+base_image = classes.BaseImage(lib_file)
 
-###RUNNING CODE
+print("\n-------------------------------")
+print("Starting Script\nAdjusting Images\nWriting Files")
+print("Check 'AlignedPhotos' folder and make sure the script is working")
+print("Check ErrorLog.txt if output isn't working as expected!")
+print("-------------------------------\n")
 
-print("\n-------------------------------\nStarting Script\nAdjusting Images\nWriting Files\nCheck 'AlignedPhotos' folder and make sure the script is working\nCheck ErrorLog.txt if output isn't working as expected!\n-------------------------------\n")
-time.sleep(5)
+time.sleep(2)
 count = 1
-fileList = os.listdir(DailyPhotoPath)
-# fileListSorted = fileList.sort(key=lambda x: os.path.getctime(x))
-fileListSorted = list(sorted(Path(DailyPhotoPath).iterdir(), key=os.path.getctime))
+fileList = os.listdir(args.photos)
+file_list_sorted = list(sorted(Path(args.photos).iterdir(), key=os.path.getctime))
 
-#specifically this for loop gets all files and only keeps the ones that are jpg files and aren't curropted or 0 in size.
-for file in tqdm(fileListSorted):
-    libfile = file
-    file = file.name #Pathlib returns it as a pathlib.WindowsPath instead of a string, and it returns the parent folder like this: parentfolder/file.jpg, so we need to convert it back into a string for the logic ahead using file.name, just the file name as string
-    if fileSuffix+file+fileAffix in os.listdir(OutputPath): #if our file has already been aligned, do nothing.
+for file in tqdm(file_list_sorted):
+    # Get various parts of the filename
+    file_path = str(file)
+    full_filename = file.name
+    file_ext = pathlib.Path(file_path).suffix
+    filename = pathlib.Path(file_path).stem
+
+    # Skip file if skip-existing flag is set and the image has already been aligned
+    if args.skip_existing and filename+OUT_EXT in os.listdir(args.output):
         pass
-    else:
-        #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
-        if file.lower().endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0 and file != "1871.jpg":
-            currentImage = classes.Image(libfile)
-            #consider taking away the walrus operator cuz its only python 3.8.0+
-            success = currentImage.alignImagetoBaseImage(BaseImage)
-            if success:
-                cv.imwrite(OutputPath+str(count)+fileSuffix+file+fileAffix,currentImage.cvimage)
-                count+=1
-            else:
-                pass #handling errors in classes.py
-       
-        else:
-            pass
-print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! \nIf you want to directly support my future (college, projects, etc.), my CashApp is $NoahCutz, or you can BuyMeACoffee (https://buymeacoffee.com/noahbuchanan).")
-input("Press Enter to exit: ")
+
+    # Skip file if its size is 0
+    if file_ext in IMAGE_EXT and os.path.getsize(file_path) == 0:
+        pass
+
+    current_image = classes.Image(file, confidence=args.confidence)
+    success = current_image.align_image_to_base_image(base_image)
+    if not success:
+        pass
+
+    if args.add_blur:
+        current_image.add_blur(file_path)
+
+    cv.imwrite(str(args.output) + filename + OUT_EXT, current_image.cvimage)
+    count+=1
+
+
+print("\nSuccessfully Aligned " + str(count) +" Pictures!")
+print("If you found this script useful, please let me know, I would love your feedback!")
+print("If you want to directly support my future (college, projects, etc.), "
+      "my CashApp is $NoahCutz, or you can BuyMeACoffee (https://buymeacoffee.com/noahbuchanan).")
+
