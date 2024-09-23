@@ -62,7 +62,7 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
 - Woa, you want to contribute, eh? Thanks, that means a lot! Feel free to write a pull request or reach out to me for any questions or ideas!
 - A few ideas I want to implement that I'm not sure how to in case you'd like to implement them!
    1. Basic GUI to make this program more accessible to people who don't know how to run python scripts
-   2. Handling multiple faces by aligning to the same face everytime (to avoid getting into ML and face recognition which might make the 'bundle size' a lot larger, I was thinking of implementing a basic crop to the center of each image, extrapolating the transformation data, then 'uncropping' in the finished file. I think this would be efficient and 95% effective).
+   2. Handling multiple faces by aligning to the same face every time (to avoid getting into ML and face recognition which might make the 'bundle size' a lot larger, I was thinking of implementing a basic crop to the center of each image, extrapolating the transformation data, then 'uncropping' in the finished file. I think this would be efficient and 95% effective).
    3. In depth error messages for the error.txt file.
    4. I tried to create an executable using pyinstaller, but I can't get the dependencies to work properly, I think that's a good first issue on this project!
   

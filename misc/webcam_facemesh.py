@@ -21,7 +21,7 @@ class Image:
         self.Xdifference = self.RightEyex - self.LeftEyex
 
 
-    def getImageCoordinates(self,targetlandmark): #converted into a streamlined function for accesiblity. can't speel. spell.
+    def getImageCoordinates(self,targetlandmark): #converted into a streamlined function for accessibility. can't speel. spell.
         with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=1,refine_landmarks=True,min_detection_confidence=0.5) as face_mesh:
             # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
             results = face_mesh.process(cv.cvtColor(self.cvimage, cv.COLOR_BGR2RGB))
@@ -67,16 +67,16 @@ class Image:
         self.LeftEyex += x 
         self.LeftEyey += y
         self.RightEyex += x
-        self.RightEyey += y #manually updating them because it'll save some computational time in refreshing the iamges.
+        self.RightEyey += y #manually updating them because it'll save some computational time in refreshing the images.
         self.cvimage = cv.warpAffine(self.cvimage, transMat, dimensions)
 
 
     def alignImagetoBaseImage(self,BaseImage):
-        initialx,initialy = BaseImage.LeftEyex,BaseImage.LeftEyey
+        initialx,initially = BaseImage.LeftEyex,BaseImage.LeftEyey
         self.scaleAroundPoint(BaseImage)
         self.refreshEyeCoordinates()
         movex = initialx - self.LeftEyex 
-        movey = initialy - self.LeftEyey
+        movey = initially - self.LeftEyey
         self.translate(movex,movey)
         self.rotateImage(BaseImage)
 

@@ -57,7 +57,7 @@ for file in tqdm(fileListSorted):
     if fileSuffix+file+fileAffix in os.listdir(OutputPath): #if our file has already been aligned, do nothing.
         pass
     else:
-        #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
+        #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each file name size is different and the initial start is different. anyways this works currently
         if file.lower().endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0 and file != "1871.jpg":
             currentImage = classes.Image(libfile)
             #consider taking away the walrus operator cuz its only python 3.8.0+

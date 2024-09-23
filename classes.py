@@ -34,7 +34,7 @@ class Image:
         self.cvimage = cv.imread(str(libfile))
         self.Height, self.Width = self.cvimage.shape[:2]
         self.Dimensions = (self.Width,self.Height)
-        # self.EnglargedDimensions = (int(self.Width*1.05),int(self.Width*1.05)) #this was meant to account for the fact the image might be cropped when transforming, but it's not working. considering bringin back later.
+        # self.EnglargedDimensions = (int(self.Width*1.05),int(self.Width*1.05)) #this was meant to account for the fact the image might be cropped when transforming, but it's not working. considering bringing back later.
         self.scaleDownImage()
         self.LeftEyeImageCoordinates = self.getImageCoordinates(leftLandmark)
         self.RightEyeImageCoordinates = self.getImageCoordinates(rightLandmark)
@@ -62,7 +62,7 @@ class Image:
             #handling error statements within the alignImagetoBaseImage class
             return ""
 
-    def getImageCoordinates(self,targetlandmark): #converted into a streamlined function for accesiblity. can't speel. spell.
+    def getImageCoordinates(self,targetlandmark): #converted into a streamlined function for accessibility. can't speel. spell.
         try:
             with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=10,refine_landmarks=True,min_detection_confidence=0.85) as face_mesh:
                 # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
@@ -104,7 +104,7 @@ class Image:
                             #x-y coord, rotation angle, scaling factor
                                             #scale from the center of img
             Matrix = cv.getRotationMatrix2D( (0,0) , 0, self.scaleFactor)  #I was looking for a way to scale around an image for so long, it was so simple. scaling from the corner
-            self.cvimage = cv.warpAffine(self.cvimage, Matrix, self.Dimensions) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of hte image gets cut off!
+            self.cvimage = cv.warpAffine(self.cvimage, Matrix, self.Dimensions) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of the image gets cut off!
 
         except Exception as error:
             pass #handling errors within the alignImagetoBaseImage class
@@ -114,7 +114,7 @@ class Image:
         self.LeftEyex += x 
         self.LeftEyey += y
         self.RightEyex += x
-        self.RightEyey += y #manually updating them because it'll save some computational time in refreshing the iamges.
+        self.RightEyey += y #manually updating them because it'll save some computational time in refreshing the images.
         self.cvimage = cv.warpAffine(self.cvimage, transMat, self.Dimensions)
 
 
@@ -124,17 +124,17 @@ class Image:
         rotationalMatrix = cv.getRotationMatrix2D(eyePoint, angle, 1.0)
         self.cvimage = cv.warpAffine(self.cvimage, rotationalMatrix, self.Dimensions ) #we use the base image's width and height in case there are different sizes, so for base image, use your smallest camera resolution photo. i took some with webcam and my phone for example, if i use my webcame image as base image, my phone will be properly scaled down.
         # finalMatrix = cv.getRotationMatrix2D((0,0) , 0, 1/self.scaleFactor)  #this is the inverse scale factor. THanks Dr. Garner.
-        # self.cvimage = cv.warpAffine(self.cvimage, finalMatrix,self.Dimensions) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of hte image gets cut off!
+        # self.cvimage = cv.warpAffine(self.cvimage, finalMatrix,self.Dimensions) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of the image gets cut off!
         return angle
 
     def alignImagetoBaseImage(self,BaseImage):   #eyePoint = (BaseImage.LeftEyex,BaseImage.LeftEyey)
         try:
-            initialx,initialy = BaseImage.LeftEyex,BaseImage.LeftEyey
+            initialx,initially = BaseImage.LeftEyex,BaseImage.LeftEyey
             self.scaleAroundPoint(BaseImage)
             self.refreshEyeCoordinates()
             movex = initialx - self.LeftEyex 
-            movey = initialy - self.LeftEyey
-            self.translate(movex,movey) #consider doing another final translation? cuz translate shoould come last after scaling the image back down but this is just experimental.
+            movey = initially - self.LeftEyey
+            self.translate(movex,movey) #consider doing another final translation? cuz translate should come last after scaling the image back down but this is just experimental.
             angle = self.rotateImage(BaseImage) # this MUST come last. idk why, but try flipping translate and rotate and see how wonky it gets.
             if self.Dimensions != BaseImage.Dimensions: #this is a check to see if we are have only 1 baseimage, this is the only time this wouldn't be equal if we have 1 base image for differing resolutioned images. it saves us throwing in an extra argument like "1baseimage" boolean, etc.
                 self.cvimage = self.cvimage[0:BaseImage.Height,0:BaseImage.Width] #crop the image down. or not.
@@ -151,7 +151,7 @@ class Image:
             # Line = ''.join(['-' for i in range(errorLength)])
             Line = ''.join(['-' for i in range (28)])
             
-            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found\n2. A scaling issue occured.\nCheck out the error:\n" +traceback.format_exc() + Line +"\n")
+            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found\n2. A scaling issue occurred.\nCheck out the error:\n" +traceback.format_exc() + Line +"\n")
             return False
         
 class BaseImage(Image):
@@ -213,5 +213,5 @@ class BaseImage(Image):
 
         eyePoint = (self.LeftEyex,self.LeftEyey)
         self.UltimateAngle = np.rad2deg(np.arctan((self.RightEyey-UltimateBaseImage.RightEyey)/(self.ExactXdifference))) #tangent formula right triangle.
-                                                                            #I'm trying out ultimate base image as the denominator because it should be teh same?
+                                                                            #I'm trying out ultimate base image as the denominator because it should be the same?
         self.reset()
