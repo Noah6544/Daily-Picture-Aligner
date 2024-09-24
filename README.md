@@ -23,7 +23,7 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
 
 ## Running:
 #### *I'm working on implementing a functional executable soon for non-programmers.*
-1. Install python then requirements.txt.
+1. Install python ([a version supported by mediapipe](https://ai.google.dev/edge/mediapipe/solutions/setup_python) and 64bit) then requirements.txt.
 2. Put some images into the DailyPhotos Folder.
 3. Choose 1 photo where the face is ideal (scale, position, rotation) and copy it into the BaseImage folder. This image should be the smallest resolution you have, as images being scaled down appears better than images scaled up (e.g. if you have 2 3000x3000 pictures, 5 pictures 1920x1080 pictures, and 3 pictures 1280x720, choose one that is 1280x720).
 4. Run main.py! Alternatively, if you're not as familiar with python, skip to #7.
@@ -68,4 +68,6 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
   
 ## Final Thoughts:
 - If you found this project useful, or interesting, please reach out to me!! This project has been my passion project and it's been a direct representation of my coding growth over the years. I'd love to see how you'd like to use it.
-- If you *really* found this project helpful, if you'd like to support me and this project, my CashApp is $ANoahBuchanan ;)
+- If you *really* found this project helpful, if you'd like to support me and this project, my CashApp is $NoahCutz, or you can 'Buy Me A Coffee' ;)
+
+<p align='center'><a href="https://www.buymeacoffee.com/NoahBuchanan" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/arial-yellow.png" alt="Buy Me A Coffee" width="150" ></a></p>

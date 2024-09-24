@@ -30,12 +30,16 @@ class FileManager: #toDO: find a better classname for the filemanager
     def __init__(self,file):
         self.file 
 
+files = os.listdir(Path(BaseImagePath))
+files = list(filter(lambda a: not a.startswith("."), files))
 
-for file in os.listdir(Path(BaseImagePath)):
-    if len(os.listdir(Path(BaseImagePath))) > 1:
-        raise Exception("Ensure there's only one base image, and that you deleted the initial text file.")
-    libfile = PurePath(BaseImagePath+file)
-    BaseImage = classes.BaseImage(libfile)
+if len(files) > 1:
+    raise Exception("Ensure there's only one base image, and that you deleted the initial text file.")
+
+file = files[0]
+
+libfile = PurePath(BaseImagePath+file)
+BaseImage = classes.BaseImage(libfile)
 
 ###RUNNING CODE
 
@@ -86,7 +90,6 @@ for file in tqdm(fileListSorted):
        
         else:
             pass
-        
-        
+
 print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! \nIf you want to directly support my future (college, projects, etc.), my CashApp is $NoahCutz, or you can BuyMeACoffee (https://buymeacoffee.com/noahbuchanan).")
 input("Press Enter to exit: ")
