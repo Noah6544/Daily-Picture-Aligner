@@ -10,6 +10,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 drawing_spec = mp_drawing.DrawingSpec(thickness=0, circle_radius=1)
 
+
 ErrorFile = open("ErrorLog.txt","a")
 
 leftLandmark = 468#468 is left eye
@@ -26,6 +27,21 @@ class Image:
             self.cvimage = cv.warpAffine(self.cvimage, Matrix, self.Dimensions) #warp affine last tuple argument must be floats!!
             self.refreshEyeCoordinates()
             return self.cvimage
+    
+    #Crops Image down to middle third to target center face  
+    def cropImageThirds(self):
+        self.cvimageCrop = self.cvimage[int(self.Height/8):int(self.Height/8*7),int(self.Width/3):int(self.Width/3*2)]
+        self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
+        self.cropStatus = 'Thirds'
+        return self.cvimageCrop
+    
+    
+    #Crops Image down to Middle Half to target center face  
+    def cropImageFourths(self):
+        self.cvimageCrop = self.cvimage[int(self.Height/8):int(self.Height/8*7),int(self.Width/4):int(self.Width/4*3)]
+        self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
+        self.cropStatus = 'Thirds'
+        return self.cvimageCrop
 
 
     def __init__(self,libfile,CorrespondingBaseImage=None):
@@ -34,8 +50,9 @@ class Image:
         self.cvimage = cv.imread(str(libfile))
         self.Height, self.Width = self.cvimage.shape[:2]
         self.Dimensions = (self.Width,self.Height)
-        # self.EnglargedDimensions = (int(self.Width*1.05),int(self.Width*1.05)) #this was meant to account for the fact the image might be cropped when transforming, but it's not working. considering bringin back later.
         self.scaleDownImage()
+        self.cropImageThirds()
+
         self.LeftEyeImageCoordinates = self.getImageCoordinates(leftLandmark)
         self.RightEyeImageCoordinates = self.getImageCoordinates(rightLandmark)
         self.CorrespondingBaseImage = CorrespondingBaseImage if CorrespondingBaseImage is not None else None #straight from stack overflow    
@@ -47,6 +64,7 @@ class Image:
         except Exception as error:
             pass
 
+    #For Debugging
     def __str__(self):
         try:
             print("Shape: ", self.cvimage.shape)
@@ -63,25 +81,58 @@ class Image:
             return ""
 
     def getImageCoordinates(self,targetlandmark): #converted into a streamlined function for accesiblity. can't speel. spell.
-        try:
-            with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=10,refine_landmarks=True,min_detection_confidence=0.85) as face_mesh:
-                # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
-                results = face_mesh.process(cv.cvtColor(self.cvimage, cv.COLOR_BGR2RGB))
-                if not results.multi_face_landmarks: #if there are no face landmarks detected it will ignore.
-                    return None
-                # Print and draw face mesh landmarks on image.
-                for face_landmarks in results.multi_face_landmarks:     
-                    for id, landmark in enumerate(face_landmarks.landmark):
-                        if id == targetlandmark: #this is the point I'm targeting: 468 is the left eye, 473 for the right looks great.
-                            self.currentImageCoordinates = [landmark.x*self.Width,landmark.y*self.Height,landmark.z]
-                            if self.currentImageCoordinates == None:
-                                raise error
-                            return self.currentImageCoordinates
-                        else:
-                            pass
-                            #don't put a return here, duh. it's looping for specific id.
-        except Exception as error:
-            pass #handling error statements within the alignImagetoBaseImage class
+        noFaceFound = True
+        count = 0
+        
+        #Progressively extends search area through relaxing crops as loop continues if face isn't found.
+        while noFaceFound:
+            #if cropping the image down to thirds resulted in a face not being detected, uncrop the image a little
+            if count == 1: 
+                self.cropImageFourths
+            if count == 2:
+                self.cvimageCrop = self.cvimage
+                self.cropStatus = None
+            if count >= 3:
+                return None 
+            try:
+                #crop the image down first, if you have multiple faces in an image, this will try to limit it only to the face in teh center
+                originalImage = self
+                with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=10,refine_landmarks=True,min_detection_confidence=0.85) as face_mesh:
+                    # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
+                    results = face_mesh.process(cv.cvtColor(self.cvimageCrop, cv.COLOR_BGR2RGB))
+                    if not results.multi_face_landmarks: #if there are no face landmarks detected it will ignore.
+                        count+=1
+                        noFaceFound = True
+                    # Print and draw face mesh landmarks on image.
+                    else:
+                        noFaceFound = False
+            
+                    
+            except Exception as error:
+                pass #handling error statements within the alignImagetoBaseImage class
+            
+        for face_landmarks in results.multi_face_landmarks:     
+            for id, landmark in enumerate(face_landmarks.landmark):
+                
+                #Execute specific math for each crop.
+                if id == targetlandmark: #this is the point I'm targeting: 468 is the left eye, 473 for the right looks great.
+                    if self.cropStatus == 'Thirds':
+                        self.currentImageCoordinates = [((landmark.x*self.WidthCrop)+originalImage.Width/3),((landmark.y*self.HeightCrop)+originalImage.Height/8),landmark.z]
+
+                    elif self.cropStatus == 'Fourths':
+                        self.currentImageCoordinates = [((landmark.x*self.WidthCrop)+originalImage.Width/4),((landmark.y*self.HeightCrop)+originalImage.Height/8),landmark.z]
+
+                    elif self.cropStatus ==  None:
+                        self.currentImageCoordinates = [((landmark.x*self.Width)),((landmark.y*self.Height)),landmark.z]
+
+                    if self.currentImageCoordinates == None:
+                        raise error
+                    return self.currentImageCoordinates
+                else:
+                    pass
+                    #don't put a return here, duh. it's looping for specific id.
+
+            
 
 
 
@@ -94,7 +145,6 @@ class Image:
             self.Xdifference = self.RightEyex - self.LeftEyex
         except Exception as error:
             pass #handling errors within the alignImagetoBaseImage class
-
 
 
 
@@ -155,6 +205,9 @@ class Image:
             return False
         
 class BaseImage(Image):
+    
+    
+
     def __init__(self, libfile): #unsure about the use and need for super. consult old spaceship game with classes. #commendting out the __init__ somehow allows the script to still 'work'
         super().__init__(libfile)
         #ultimately, what we need is:        
@@ -200,14 +253,9 @@ class BaseImage(Image):
         self.UltimateDimensions = (self.UltimateBaseImageWidth,self.UltimateBaseImageHeight)
         self.UltimatescaleFactor = UltimateBaseImage.Xdifference/self.Xdifference
         self.ExactXdifference = self.Xdifference*self.UltimatescaleFactor
-        # print("initial ultimatexdiff: ",UltimateBaseImage.Xdifference)
-        # print("initial baseimagexdiff: ",self.Xdifference)
         center = (self.LeftEyex, self.LeftEyey)
         Matrix = cv.getRotationMatrix2D((0,0), 0, self.UltimatescaleFactor)  #I was looking for a way to scale around an image for so long, it was so simple. 
         self.cvimage = cv.warpAffine(self.cvimage, Matrix, UltimateBaseImage.Dimensions) #the final one in warp affine is the image dimensions
- 
-        # print("2nd ultimatexdiff: ",UltimateBaseImage.Xdifference)
-        # print("2nd baseimagexdiff: ",self.Xdifference)
         self.UltimatetranslateX = UltimateBaseImage.LeftEyex - self.LeftEyex 
         self.UltimatetranslateY = UltimateBaseImage.LeftEyey - self.LeftEyey
 

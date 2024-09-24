@@ -8,7 +8,7 @@ import argparse
 import classes 
 import time
 from tqdm import tqdm, trange
-
+from PIL import Image as ExifImage
 
 
 
@@ -44,23 +44,43 @@ BaseImage = classes.BaseImage(libfile)
 ###RUNNING CODE
 
 print("\n-------------------------------\nStarting Script\nAdjusting Images\nWriting Files\nCheck 'AlignedPhotos' folder and make sure the script is working\nCheck ErrorLog.txt if output isn't working as expected!\n-------------------------------\n")
-time.sleep(5)
-count = 1
-fileList = os.listdir(DailyPhotoPath)
-# fileListSorted = fileList.sort(key=lambda x: os.path.getctime(x))
-fileListSorted = list(sorted(Path(DailyPhotoPath).iterdir(), key=os.path.getctime))
 
-#specifically this for loop gets all files and only keeps the ones that are jpg files and aren't curropted or 0 in size.
+time.sleep(3)
+
+#The following code sorts images by EXIF data, the metadate embeded in the file, as opposed to creation date.
+#This is because files downloaded from, for example, GooglePhotos, have creation date at the time of download, but exif data of the time they were taken
+ 
+fileList = os.listdir(DailyPhotoPath)
+exifDict = dict.fromkeys(fileList)
+
+for img in fileList:
+    try:
+        exifDict[img] = (ExifImage.open(DailyPhotoPath+img)._getexif()[36867])
+    except:
+        del exifDict[img]
+
+newList = sorted(exifDict.items(), key=lambda x: x[1]) #sorts images in a [(path/, date), (path, date)] format
+fileListSorted =  []
+for img in newList:
+    img = Path(DailyPhotoPath + img[0])
+    fileListSorted.append(img)
+
+
+completedFiles = [x.split(fileSuffix)[1] for x in os.listdir(OutputPath)]
+
+count = 1
+
+#this for gets all files keeps the ones that are uncorrupted (>0bytes) jpg/png files.
 for file in tqdm(fileListSorted):
     libfile = file
     file = file.name #Pathlib returns it as a pathlib.WindowsPath instead of a string, and it returns the parent folder like this: parentfolder/file.jpg, so we need to convert it back into a string for the logic ahead using file.name, just the file name as string
-    if fileSuffix+file+fileAffix in os.listdir(OutputPath): #if our file has already been aligned, do nothing.
+    if file in completedFiles: #if our file has already been aligned, do nothing.
+        count+=1
         pass
     else:
         #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
-        if file.lower().endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0 and file != "1871.jpg":
+        if file.lower().endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0:
             currentImage = classes.Image(libfile)
-            #consider taking away the walrus operator cuz its only python 3.8.0+
             success = currentImage.alignImagetoBaseImage(BaseImage)
             if success:
                 cv.imwrite(OutputPath+str(count)+fileSuffix+file+fileAffix,currentImage.cvimage)
@@ -70,5 +90,6 @@ for file in tqdm(fileListSorted):
        
         else:
             pass
+
 print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! \nIf you want to directly support my future (college, projects, etc.), my CashApp is $NoahCutz, or you can BuyMeACoffee (https://buymeacoffee.com/noahbuchanan).")
 input("Press Enter to exit: ")
