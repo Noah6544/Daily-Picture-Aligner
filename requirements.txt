@@ -1,5 +1,6 @@
 mediapipe==0.10.8
-numpy==1.26.2
+numpy==2.1.1
 opencv_contrib_python==4.8.1.78
 opencv_python==4.8.1.78
+Pillow==10.4.0
 tqdm==4.66.1
