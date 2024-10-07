@@ -83,7 +83,7 @@ for file in tqdm(fileListSorted):
             currentImage = classes.Image(libfile)
             success = currentImage.alignImagetoBaseImage(BaseImage)
             if success:
-                cv.imwrite(OutputPath+str(count)+fileSuffix+file+fileAffix,currentImage.cvimage)
+                cv.imwrite(OutputPath+str(count)+"_"+fileSuffix+libfile.stem+fileAffix , currentImage.cvimage)
                 count+=1
             else:
                 pass #handling errors in classes.py
