@@ -4,13 +4,9 @@ import mediapipe as mp
 import cv2 as cv
 import traceback
 mp_face_mesh = mp.solutions.face_mesh
-face_cascade = cv.CascadeClassifier("C:\CODING\TakingDailyPhoto Stuff Home Fall Braek\models\haarcascade_frontalface_default.xml")
+face_cascade = cv.CascadeClassifier("C:\CODING\Github\Daily-Picture-Aligner\models\haarcascade_frontalface_default.xml")
 
-faceAverageDistance = (open('faceIdentifier.txt','r')).read()
-if faceAverageDistance == "":
-    faceModelExists = False
-else:
-    faceModelExists = True
+
 
 ErrorFile = open("ErrorLog.txt","a")
 leftEyeLandmark = 468
@@ -29,7 +25,8 @@ faceRecognizer.read('face_trainer.yml')
 class Image:
     def getCorrectFace(self): #return a list of cvimages with cropped faces
         self.allFaces = []
-        faces = face_cascade.detectMultiScale( cv.cvtColor(self.cvimage, cv.COLOR_BGR2GRAY), scaleFactor=1.01, minNeighbors=5)
+        img = cv.cvtColor(self.cvimage, cv.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(img , scaleFactor=1.01, minNeighbors=3)
         for (x, y, w, h) in faces:
             croppedImg = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
             id_, confidence = faceRecognizer.predict(cv.cvtColor(croppedImg,cv.COLOR_BGR2GRAY))
@@ -46,12 +43,21 @@ class Image:
 
 
         for face in self.allFaces:
+            try:
+                x = self.getImageCoordinates(leftEyeLandmark)[0]
+            except:
+                self.allFaces.pop(face)
+                
             confidence = face[3]
             if confidence < min_difference:
                 min_difference = confidence
                 closest_face = face
 
         if closest_face is not None:
+            mask = np.zeros_like(self.cvimage)
+            x, y, w, h = closest_face[1][0], closest_face[1][1], closest_face[2][0], closest_face[2][1]
+            mask[y:y+h, x:x+w] = self.cvimage[y:y+h, x:x+w]
+            self.cvimage = mask
             self.cvimageCrop = closest_face[0]
             x,y = closest_face[1][0],closest_face[1][1]
             w,h = closest_face[2][0],closest_face[2][1]
@@ -174,9 +180,6 @@ class Image:
 
 
     def __init__(self,libfile,CorrespondingBaseImage=None):
-        self.correctFaceRatio = open('faceIdentifier.txt','r').read()
-        if self.correctFaceRatio == "":
-            raise Exception("Please train the basic model by running 'trainBasicFaceModel.py' before running this script.")
         self.libfile = libfile
         self.name = libfile.name
         self.cvimage = cv.imread(str(libfile))
