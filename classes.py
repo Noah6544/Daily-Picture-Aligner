@@ -1,9 +1,13 @@
 ###IMPORTS
+
+
 import numpy as np
 import mediapipe as mp
 import cv2 as cv
 import traceback
 mp_face_mesh = mp.solutions.face_mesh
+mp_drawing = mp.solutions.drawing_utils
+drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 face_cascade = cv.CascadeClassifier("C:\CODING\Github\Daily-Picture-Aligner\models\haarcascade_frontalface_default.xml")
 
 
@@ -21,141 +25,100 @@ leftEyeBrowLandmark = 107
 faceRecognizer = cv.face.LBPHFaceRecognizer_create()
 faceRecognizer.read('face_trainer.yml')
 
-
 class Image:
     def getCorrectFace(self): #return a list of cvimages with cropped faces
         self.allFaces = []
-        img = cv.cvtColor(self.cvimage, cv.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(img , scaleFactor=1.01, minNeighbors=3)
+        faces = face_cascade.detectMultiScale(cv.cvtColor(self.cvimage, cv.COLOR_BGR2GRAY) , scaleFactor=1.15, minNeighbors=3)
+        
+        # get all detected faces and put them in self.allFaces
         for (x, y, w, h) in faces:
-            croppedImg = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
-            id_, confidence = faceRecognizer.predict(cv.cvtColor(croppedImg,cv.COLOR_BGR2GRAY))
-            self.allFaces.append( [croppedImg, (x,y),(w,h), confidence] )
+            try:
+                newy = y-100
+                newx = x-100
+                newh = h+200
+                neww = w+200
+                croppedImg = self.cvimage[int(newy):int(newy+newh), int(newx):int(newx+neww)]  
+                id_, confidence = faceRecognizer.predict(cv.cvtColor(croppedImg,cv.COLOR_BGR2GRAY))
+                self.allFaces.append([croppedImg, (newx,newy),(neww,newh), confidence] )
+            except Exception as error: #perhaps the detected face is in the corner, and we can't subtract the pixles from the x,y,w,h
+                try:                
+                    croppedImg = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
+                    id_, confidence = faceRecognizer.predict(cv.cvtColor(croppedImg,cv.COLOR_BGR2GRAY))
+                    self.allFaces.append( [croppedImg, (x,y),(w,h), confidence] )
+                except Exception as error:
+                    raise error           
 
+        #if there is only one face detected, it probably is the correct face, so we return it
         if len(self.allFaces) == 1:
-            self.cvimageCrop = self.allFaces[0]
+            self.cvimageCrop = self.cvimage
             self.cropStatus = "None"
             self.offset = (0,0)
             return self.cvimage
         
+
+        #Gets the correct face, it also filters out faces that can't even have facial features detected, increasing accuracy of getting correct face (likely misidentifications of faces cuz haarcascades lowkey sucks)
+        popList = []
+        self.closest_face = [float('inf')] #needs to be global maybe
         min_difference = float('inf')
-        closest_face = None
-
-
-        for face in self.allFaces:
+        for index, face in enumerate(self.allFaces):
             try:
-                x = self.getImageCoordinates(leftEyeLandmark)[0]
-            except:
-                self.allFaces.pop(face)
+                # If cvimageCrop == closest_face, we don't want to overwrite it, so use a temp variable
+                # Also need to ensure that self.cvimageCrop exists or else it'll throw an error
+                try:
+                    self.cvimageCrop == True
+                    if self.cvimageCrop == self.closest_face[0] and self.closest_face is not None:
+                        temp2 = self.cvimageCrop
+                    else:
+                        pass
+                except Exception as e : #it hasn't been defined yet
+                    temp2 = None
+                    pass
                 
-            confidence = face[3]
-            if confidence < min_difference:
-                min_difference = confidence
-                closest_face = face
-
-        if closest_face is not None:
-            mask = np.zeros_like(self.cvimage)
-            x, y, w, h = closest_face[1][0], closest_face[1][1], closest_face[2][0], closest_face[2][1]
+                self.cvimageCrop, confidence = face[0], face[3]
+                self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
+                tryToGetCoords = self.getImageCoordinates(leftEyeLandmark)[0]
+                self.cvimageCrop = temp2
+                if confidence < min_difference:
+                    min_difference = confidence
+                    self.closest_face = face
+                    self.cvimageCrop = self.closest_face[0]
+            except Exception as e:
+                #this is probably useless, probablye shoud just except the errro and move on.
+                self.cvimageCrop = temp2
+                popList.append(index)
+            finally:
+                continue
+ 
+        
+        
+        #this might be useless, not sure if we need to even refine self.allfaces, probably could've just excepted the error and moved on.
+        count = 0
+        for index in popList:
+            self.allFaces.pop(index-count)
+            count+=1
+               
+                
+        # Now that we have the correct face, we want to apply black around the borders of that face instead of zooming the image in and performing landmark detection on that
+        # This is because the landmark detection is more inaccurate when the image is zoomed in, so performing detection on the normal scale is more accurate
+        if self.closest_face is not None:
+            # Apply an inverted black mask to the image, leaving only the face
+            mask = np.zeros(self.cvimage.shape, dtype=np.uint8)
+            x, y, w, h = int(self.closest_face[1][0]), int(self.closest_face[1][1]), int(self.closest_face[2][0]), int(self.closest_face[2][1])
             mask[y:y+h, x:x+w] = self.cvimage[y:y+h, x:x+w]
-            self.cvimage = mask
-            self.cvimageCrop = closest_face[0]
-            x,y = closest_face[1][0],closest_face[1][1]
-            w,h = closest_face[2][0],closest_face[2][1]
+            self.cvimageCrop = mask
             self.offset = (x,y)
-            y -= 150
-            x -= 150
-            h += 300
-            w += 300
-            self.cvimageCrop = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
-            self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
-            cv.imshow("crop image",self.cvimageCrop)
-            cv.waitKey(1)
-            cv.destroyAllWindows()
+            # self.cvimageCrop = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
+            # self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
             return self.cvimageCrop
-    
+        
         
         return None
 
-        
-    # def getCorrectFace(self):
-    #     type(self).__name__
-    #     self.getAllFaces()
-    #     if len(self.allFaces) == 1:
-    #         self.cvimageCrop = self.allFaces[0]
-    #         self.cropStatus = "None"
-    #         self.offset = (0,0)
-    #         return self.cvimage
-    #     count=0
-    #     min_difference = float('inf')
-    #     closest_face = None
-    #     for index, face in enumerate(self.allFaces):
-    #         x,y = self.allFaces[index][1][0],self.allFaces[index][1][1]
-    #         self.offset = (x,y)
-    #         face = face[0]
-    #         # try:
-    #         #     cv.imshow("crop image",face)
-    #         #     cv.waitKey(1)
-    #         #     cv.destroyAllWindows()
-    #         # except Exception as error:
-    #         #     pass
-    #         faceDetected = True
-    #         #this try statement is to handle the case where the cropStatus attribute doesn't exist yet, which sets to cropped if it doens't exist yet, allowing us to not overwrite if we set to none above on purpose
-    #         try:
-    #             self.cropStatus == "None"
-    #         except AttributeError:
-    #             self.cropStatus = "Cropped"
-    #         #get the right/left eye image ratio
-    #         #compare each ratio to the one in the file
-    #         #return the cropped image of the face that is closest to the average ratio in the file       
-    #         self.cvimageCrop = face
-    #         self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
-
-          
-    #         try:
-    #             RightEyeX = self.getImageCoordinates(rightEyeLandmark)[0]
-    #             LeftEyeX = self.getImageCoordinates(leftEyeLandmark)[0]
-    #             leftNoseX = self.getImageCoordinates(leftNoseCornerLandmark)[0]
-    #             rightNoseX = self.getImageCoordinates(rightNoseCornerLandmark)[0]
-    #             topLipY = self.getImageCoordinates(topLipLandmark)[1]
-    #             bottomLipY = self.getImageCoordinates(bottomLipLandmark)[1]
-    #             leftEyeBrow = self.getImageCoordinates(leftEyeBrowLandmark)[0]
-    #             rightEyeBrow = self.getImageCoordinates(rightEyeBrowLandmark)[0]
-    #             if self.cropStatus == 'Cropped':
-    #                 pass
-    #                 # LeftEyeX = LeftEyeX+x  
-    #                 # RightEyeX = RightEyeX-x
-    #         except TypeError as error:
-    #             faceDetected = False
-            
-    #         if faceDetected:
-    #             cv.imshow("crop image",self.cvimageCrop)
-    #             cv.waitKey(1)
-    #             cv.destroyAllWindows()
-    #             modelValue = ((RightEyeX/LeftEyeX) + (rightNoseX/leftNoseX) + (topLipY/bottomLipY) + (rightEyeBrow/leftEyeBrow))  
-    #             # Compare each ratio to the one in the file
-    #             closest_face = None
-    #             difference = abs(float(modelValue) - float(self.correctFaceRatio))
-    #             if difference < min_difference:
-    #                 min_difference = difference
-    #                 closest_face = face
-    #                 offset = (x,y)
-    #             count+=1
-
-
-    #     if closest_face is not None:
-    #         self.cvimageCrop = closest_face
-    #         self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
-    #         self.offset = offset
-    #         return self.cvimageCrop
-            
-    #     else:
-    #         pass
-        
+       
 
     def scaleDownImage(self):
           #if it's a landscape image
         if self.Width > self.Height and (self.Height >= 3024 or self.Width >= 4032): #for some reason, if an image is too large, there seems to be some landmakr detection issues, therefore, we scale the image down by 2
-
             self.Height, self.Width = int(self.cvimage.shape[0]/2),int(self.cvimage.shape[1]/2)
             self.Dimensions = (self.Width, self.Height)  #divide by 2 here, and not above, for some reason, this makes sure it is a INT and not an float!
             Matrix = cv.getRotationMatrix2D( (0,0), 0, 0.5) #leave it at (0,0) it seems to work better for 1 base image alignments. idk why YET
@@ -183,11 +146,13 @@ class Image:
         self.libfile = libfile
         self.name = libfile.name
         self.cvimage = cv.imread(str(libfile))
+        self.closest_face = []
         self.Height, self.Width = self.cvimage.shape[:2]
         self.Dimensions = (self.Width,self.Height)
         self.scaleDownImage()
         # self.cropImageThirds()
         self.getCorrectFace()
+        self.HeightCrop, self.WidthCrop = self.cvimage.shape[:2] # Leave this, trust me. unless you wanna dig through the debug to figure out why. 
         self.LeftEyeImageCoordinates = self.getImageCoordinates(leftEyeLandmark)
         self.RightEyeImageCoordinates = self.getImageCoordinates(rightEyeLandmark)
         self.CorrespondingBaseImage = CorrespondingBaseImage if CorrespondingBaseImage is not None else None #straight from stack overflow    
@@ -224,8 +189,7 @@ class Image:
         
         #Progressively extends search area through relaxing crops as loop continues if face isn't found.
           #rather- for the new crop method, parse through self.allFaces and search for the one that matches most closesly to self.averageEyeDistance
-        
-
+    
         try:
             #crop the image down first, if you have multiple faces in an image, this will try to limit it only to the face in teh center
             originalImage = self
@@ -235,20 +199,22 @@ class Image:
                 if not results.multi_face_landmarks: #if there are no face landmarks detected it will ignore.
                     count+=1
                 # Print and draw face mesh landmarks on image.
-                else:            
-                    for face_landmarks in results.multi_face_landmarks:     
+                else:
+                    annotatedImage = self.cvimageCrop.copy()
+                    for face_landmarks in results.multi_face_landmarks:
+                        # mp_drawing.draw_landmarks(annotatedImage, face_landmarks, mp_face_mesh.FACE_CONNECTIONS)
                         for id, landmark in enumerate(face_landmarks.landmark):
                             if id == targetlandmark: #this is the point we're targeting: 468 is the left eye, 473 for the right.
                                 #We execute the cropping with the get correct face with the index for the x,y,w,h
-                                self.currentImageCoordinates = [(landmark.x*self.WidthCrop)+self.offset[0],(landmark.y*self.HeightCrop)+self.offset[1],landmark.z]
+                                self.currentImageCoordinates = [(landmark.x*self.WidthCrop),(landmark.y*self.HeightCrop),landmark.z]
                                 return self.currentImageCoordinates
                             else:
                                 pass
                                 #don't put a return here, duh. it's looping for specific id.
-
-        
-                
-        except Exception as error:
+                        
+                        
+        except Exception as e:
+  
             pass #handling error statements within the alignImagetoBaseImage class
             
  
@@ -351,6 +317,12 @@ class BaseImage(Image):
         self.LeftEyeImageCoordinates = self.getImageCoordinates(leftEyeLandmark)
         self.RightEyeImageCoordinates = self.getImageCoordinates(rightEyeLandmark)
         try:
+            # cv.imshow("BaseImage",self.cvimage)
+            # cv.waitKey(0)
+            # cv.destroyAllWindows()
+            # cv.imshow("BaseImageCrop",self.cvimageCrop)
+            # cv.waitKey(0)
+            # cv.destroyAllWindows()
             self.LeftEyex, self.LeftEyey = self.LeftEyeImageCoordinates[0],self.LeftEyeImageCoordinates[1]
             self.RightEyex, self.RightEyey = self.RightEyeImageCoordinates[0],self.RightEyeImageCoordinates[1]
             self.Ydifference = self.RightEyey - self.LeftEyey

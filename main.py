@@ -40,7 +40,9 @@ file = files[0]
 
 libfile = PurePath(BaseImagePath+file)
 BaseImage = classes.BaseImage(libfile)
-
+# cv.imshow("",BaseImage.cvimageCrop)
+# cv.waitKey(0)
+# cv.destroyAllWindows()
 
 ###RUNNING CODE
 
