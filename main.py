@@ -48,7 +48,6 @@ BaseImage = classes.BaseImage(libfile)
 
 print("\n-------------------------------\nStarting Script\nAdjusting Images\nWriting Files\nCheck 'AlignedPhotos' folder and make sure the script is working\nCheck ErrorLog.txt if output isn't working as expected!\n-------------------------------\n")
 
-time.sleep(3)
 
 #The following code sorts images by EXIF data, the metadate embeded in the file, as opposed to creation date.
 #This is because files downloaded from, for example, GooglePhotos, have creation date at the time of download, but exif data of the time they were taken
@@ -68,8 +67,7 @@ for img in sortedExifList:
     img = Path(DailyPhotoPath + img[0])
     fileListSorted.append(img)
 
-
-completedFiles = [x.split(fileSuffix)[1] for x in os.listdir(OutputPath)]
+completedFiles = open("completedImages.txt", "r").read().split(",")
 count = 0
 
 #this for gets all files keeps the ones that are uncorrupted (>0bytes) jpg/png files.
@@ -78,22 +76,25 @@ for index, file in enumerate(tqdm(fileListSorted)):
     file = file.name #Pathlib returns it as a pathlib.WindowsPath instead of a string, and it returns the parent folder like this: parentfolder/file.jpg, so we need to convert it back into a string for the logic ahead using file.name, just the file name as string
     if file in completedFiles: #if our file has already been aligned, do nothing.
         pass
+        count+=1
     else:
         #endswith("g") because that's for png/jpg files. I didn't know how to check for the last 4 position slots because each fle name size is different and the initial start is different. anyways this works currently
         if file.lower().endswith("g") and os.path.getsize(DailyPhotoPath + file) > 0:
             currentImage = classes.Image(libfile)
             success = currentImage.alignImagetoBaseImage(BaseImage)
             if success:
+               
                 if sortedExifList[index][0] == file:
                     date = str(sortedExifList[index][1])
                     date = date.replace(":","-") #colons aren't allowd in file names!! 
                     count+=1
-
                     cv.imwrite(OutputPath+str(count)+"_"+fileSuffix+libfile.stem+"_"+date+"_"+fileAffix , currentImage.cvimage)
                 else:
                     count+=1
                     cv.imwrite(OutputPath+str(count)+"_"+fileSuffix+libfile.stem+fileAffix , currentImage.cvimage)
-
+                
+                with open("completedImages.txt", "a") as completed_file:
+                    completed_file.write(file + ",")
 
             else:
                 pass #handling errors in classes.py

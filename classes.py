@@ -26,93 +26,49 @@ faceRecognizer = cv.face.LBPHFaceRecognizer_create()
 faceRecognizer.read('face_trainer.yml')
 
 class Image:
-    def getCorrectFace(self): #return a list of cvimages with cropped faces
-        self.allFaces = []
-        faces = face_cascade.detectMultiScale(cv.cvtColor(self.cvimage, cv.COLOR_BGR2GRAY) , scaleFactor=1.15, minNeighbors=3)
-        
-        # get all detected faces and put them in self.allFaces
-        for (x, y, w, h) in faces:
-            try:
-                newy = y-100
-                newx = x-100
-                newh = h+200
-                neww = w+200
-                croppedImg = self.cvimage[int(newy):int(newy+newh), int(newx):int(newx+neww)]  
-                id_, confidence = faceRecognizer.predict(cv.cvtColor(croppedImg,cv.COLOR_BGR2GRAY))
-                self.allFaces.append([croppedImg, (newx,newy),(neww,newh), confidence] )
-            except Exception as error: #perhaps the detected face is in the corner, and we can't subtract the pixles from the x,y,w,h
-                try:                
-                    croppedImg = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
-                    id_, confidence = faceRecognizer.predict(cv.cvtColor(croppedImg,cv.COLOR_BGR2GRAY))
-                    self.allFaces.append( [croppedImg, (x,y),(w,h), confidence] )
-                except Exception as error:
-                    raise error           
-
-        #if there is only one face detected, it probably is the correct face, so we return it
-        if len(self.allFaces) == 1:
-            self.cvimageCrop = self.cvimage
-            self.cropStatus = "None"
-            self.offset = (0,0)
-            return self.cvimage
-        
-
-        #Gets the correct face, it also filters out faces that can't even have facial features detected, increasing accuracy of getting correct face (likely misidentifications of faces cuz haarcascades lowkey sucks)
-        popList = []
-        self.closest_face = [float('inf')] #needs to be global maybe
-        min_difference = float('inf')
-        for index, face in enumerate(self.allFaces):
-            try:
-                # If cvimageCrop == closest_face, we don't want to overwrite it, so use a temp variable
-                # Also need to ensure that self.cvimageCrop exists or else it'll throw an error
-                try:
-                    self.cvimageCrop == True
-                    if self.cvimageCrop == self.closest_face[0] and self.closest_face is not None:
-                        temp2 = self.cvimageCrop
-                    else:
-                        pass
-                except Exception as e : #it hasn't been defined yet
-                    temp2 = None
-                    pass
-                
-                self.cvimageCrop, confidence = face[0], face[3]
-                self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
-                tryToGetCoords = self.getImageCoordinates(leftEyeLandmark)[0]
-                self.cvimageCrop = temp2
-                if confidence < min_difference:
-                    min_difference = confidence
-                    self.closest_face = face
-                    self.cvimageCrop = self.closest_face[0]
-            except Exception as e:
-                #this is probably useless, probablye shoud just except the errro and move on.
-                self.cvimageCrop = temp2
-                popList.append(index)
-            finally:
-                continue
- 
-        
-        
-        #this might be useless, not sure if we need to even refine self.allfaces, probably could've just excepted the error and moved on.
+    # Instead of using facial detection (20 hours to implement)
+    # Instead of using selective cropping (10 hours to implement)
+    # Instead of using any other fancy method
+    # Just slowly expand the image from the center.
+    # After coding the last two, this took 10 minutes to implement.
+    # Plan before you code, look at all potential solutions.
+    def getCorrectFace(self):
         count = 0
-        for index in popList:
-            self.allFaces.pop(index-count)
-            count+=1
-               
-                
-        # Now that we have the correct face, we want to apply black around the borders of that face instead of zooming the image in and performing landmark detection on that
-        # This is because the landmark detection is more inaccurate when the image is zoomed in, so performing detection on the normal scale is more accurate
-        if self.closest_face is not None:
-            # Apply an inverted black mask to the image, leaving only the face
+        faceNotFound = True
+        refineScaleFactor = 1/6
+        self.HeightCrop,self.WidthCrop = self.cvimage.shape[:2]
+        while faceNotFound:
+            if refineScaleFactor > 1: #if it's too large, we can't find the face, so we just return the original image
+                refineScaleFactor = 1
+            Height,Width = self.cvimage.shape[:2]
             mask = np.zeros(self.cvimage.shape, dtype=np.uint8)
-            x, y, w, h = int(self.closest_face[1][0]), int(self.closest_face[1][1]), int(self.closest_face[2][0]), int(self.closest_face[2][1])
+            center_x, center_y = Width // 2, Height // 2
+            side_length = int(Height * refineScaleFactor)
+            x = center_x - side_length // 2
+            y = center_y - side_length // 2
+            w = h = side_length
             mask[y:y+h, x:x+w] = self.cvimage[y:y+h, x:x+w]
             self.cvimageCrop = mask
-            self.offset = (x,y)
-            # self.cvimageCrop = self.cvimage[int(y):int(y+h), int(x):int(x+w)]
-            # self.HeightCrop,self.WidthCrop = self.cvimageCrop.shape[:2]
-            return self.cvimageCrop
-        
-        
-        return None
+
+            try:
+                tryToGetCoords = self.getImageCoordinates(leftEyeLandmark)[0] #ToDo: find a way to put this under the confidence and maintain the self.cvimageCrop = temp2
+                faceNotFound = False
+            except Exception as e:
+                refineScaleFactor += 1/6
+                count+=1
+                if count > 10:
+                    self.cvimageCrop = self.cvimage
+                    faceNotFound = False
+                continue           
+            
+            if count > 10:
+                self.cvimageCrop = self.cvimage
+                faceNotFound = False
+                break
+
+
+
+            
 
        
 
@@ -284,8 +240,7 @@ class Image:
             # Line = ''.join(['-' for i in range(errorLength)])
             Line = ''.join(['-' for i in range (28)])
             
-            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found\n2. A scaling issue occured.\nCheck out the error:\n" +traceback.format_exc() + Line +"\n")
-            raise error
+            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found (Face detection may not work on this image, Ensure the face isn't covered and lighting isn't harsh).\n2. A scaling issue occured.\nCheck out the error:\n" +traceback.format_exc() + Line +"\n")
             return False
         
 class BaseImage(Image):
