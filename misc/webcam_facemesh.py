@@ -39,18 +39,16 @@ class Image:
 
 
     def refreshEyeCoordinates(self): #this is needed because after the transformations, the eye locations change!
-        self.LeftEyeImageCoordinates = self.getImageCoordinates(468) #for the webcam alignment, this is horrendously slow. like 2fps.
-        self.RightEyeImageCoordinates = self.getImageCoordinates(473) #and then to make it worse, we do it again for another eye.
-        self.LeftEyex, self.LeftEyey = self.LeftEyeImageCoordinates[0],self.LeftEyeImageCoordinates[1]
-        self.RightEyex, self.RightEyey = self.RightEyeImageCoordinates[0],self.RightEyeImageCoordinates[1]
-
+        self.LeftEyex, self.LeftEyey =  self.LeftEyex*self.scaleFactor, self.LeftEyey*self.scaleFactor
+        self.RightEyex, self.RightEyey =  self.RightEyex*self.scaleFactor, self.RightEyey*self.scaleFactor
+        self.Xdifference = self.RightEyex - self.LeftEyex
 
     def scaleAroundPoint(self, BaseImage): #this function scales the image by a calculated scalefactor to remove and differences in camera distance.
         point = (BaseImage.LeftEyex,BaseImage.LeftEyey) 
-        scaleFactor = (BaseImage.Xdifference/self.Xdifference) #a very simply formula i came up with, wasn't my first iteration, but it works now. I'm saying that like it's complex math, its literally a fraction ratio
+        self.scaleFactor = (BaseImage.Xdifference/self.Xdifference) #a very simply formula i came up with, wasn't my first iteration, but it works now. I'm saying that like it's complex math, its literally a fraction ratio
         center = (self.Width , self.Height)
                          #x-y coord, rotation angle, scaling factor
-        Matrix = cv.getRotationMatrix2D(center, 0, scaleFactor) #I was looking for a way to scale around an image for so long, it was so simple. 
+        Matrix = cv.getRotationMatrix2D(center, 0, self.scaleFactor) #I was looking for a way to scale around an image for so long, it was so simple. 
         self.cvimage = cv.warpAffine(self.cvimage, Matrix, (self.Width, self.Height))
 
     def rotateImage(self,BaseImage): #this function rotates the image so that the slope of the eyes will align with the slope of the base image, if that makes sense. if it doesn't it just makes it better trust me.
@@ -86,7 +84,7 @@ face_id_points = []
 # For webcam input:
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 cap = cv.VideoCapture(0, cv.CAP_DSHOW)
-BaseImage = Image(cv.imread("BaseImages/baseimage2.jpg"))
+BaseImage = Image(cv.imread("C:/CODING/Github/Daily-Picture-Aligner/BaseImages/baseimage2.jpg"))
 
 cap.set(cv.CAP_PROP_FRAME_HEIGHT,4000)
 cap.set(cv.CAP_PROP_FRAME_WIDTH,4000)

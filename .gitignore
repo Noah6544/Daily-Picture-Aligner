@@ -10,3 +10,8 @@ BaseImages/**
 
 DailyPhotos/**
 !DailyPhotos/DELETETHIS.txt
+
+/AlignedPhotosd/**
+
+
+/DailyPhotosdd

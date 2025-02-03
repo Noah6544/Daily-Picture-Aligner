@@ -94,7 +94,8 @@ for index, file in enumerate(tqdm(fileListSorted)):
                     cv.imwrite(OutputPath+str(count)+"_"+fileSuffix+libfile.stem+fileAffix , currentImage.cvimage)
                 
                 with open("completedImages.txt", "a") as completed_file:
-                    completed_file.write(file + ",")
+                    # completed_file.write(file + ",")
+                    pass
 
             else:
                 pass #handling errors in classes.py
@@ -104,3 +105,4 @@ for index, file in enumerate(tqdm(fileListSorted)):
 
 print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! \nIf you want to directly support my future (college, projects, etc.), my CashApp is $NoahCutz, or you can BuyMeACoffee (https://buymeacoffee.com/noahbuchanan).")
 input("Press Enter to exit: ")
+
