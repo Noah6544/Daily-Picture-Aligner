@@ -13,7 +13,6 @@ mp_drawing = mp.solutions.drawing_utils
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 ErrorFile = open("ErrorLog.txt","a")
-ErrorFile.write("YOUR MOM")
 leftEyeLandmark = 468
 rightEyeLandmark = 473 
 leftNoseCornerLandmark = 49
@@ -25,18 +24,17 @@ leftEyeBrowLandmark = 107
 
 import cv2
 import numpy as np
+import random
 
 
 class Image:
     def scaleDownImage(self):
         #if it's a landscape image
         if self.Width > self.Height and (self.Height >= 3024 or self.Width >= 4032): #for some reason, if an image is too large, there seems to be some landmakr detection issues, therefore, we scale the image down by 2
-
             self.Height, self.Width = int(self.cvimage.shape[0]/2),int(self.cvimage.shape[1]/2)
-            self.Dimensions = (self.Width, self.Height)  #divide by 2 here, and not above, for some reason, this makes sure it is a INT and not an float!
-            Matrix = cv.getRotationMatrix2D( (0,0), 0, 0.5) #leave it at (0,0) it seems to work better for 1 base image alignments. idk why YET
+            self.Dimensions = (self.Width, self.Height)
+            Matrix = cv.getRotationMatrix2D( (0,0), 0, .5) #leave it at (0,0) to scale from the upper left corner, and 0.5 to scale down by half.
             self.cvimage = cv.warpAffine(self.cvimage, Matrix, self.Dimensions) #warp affine last tuple argument must be floats!!
-            self.refreshEyeCoordinates()
             return self.cvimage
 
     # Instead of using facial detection (20 hours to implement)
@@ -89,6 +87,7 @@ class Image:
         self.failedImages = []
         self.Height, self.Width = self.cvimage.shape[:2]
         self.Dimensions = (self.Width,self.Height)
+        
         self.scaleDownImage()
         self.getCorrectFace()
         self.HeightCrop, self.WidthCrop = self.cvimage.shape[:2] # Leave this, trust me. unless you wanna dig through the debug to figure out why. 
@@ -117,7 +116,7 @@ class Image:
             return "hey"
         except Exception as error:
             #handling error statements within the alignImagetoBaseImage class
-            return ""
+            return "Error in __str__ method"
 
     def getImageCoordinates(self,targetlandmark): #converted into a streamlined function for accesiblity. can't speel. spell.
         try:
@@ -132,10 +131,10 @@ class Image:
         try:
             #crop the image down first, if you have multiple faces in an image, this will try to limit it only to the face in teh center
             originalImage = self
-            with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=1,refine_landmarks=True,min_detection_confidence=0.85) as face_mesh:
+            with mp_face_mesh.FaceMesh(static_image_mode=True,max_num_faces=10,refine_landmarks=True,min_detection_confidence=0.85) as face_mesh:
                 # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
                 results = face_mesh.process(cv.cvtColor(self.cvimageCrop, cv.COLOR_BGR2RGB))
-                if not results.multi_face_landmarks: #if there are no face landmarks detected it will ignore.
+                if False: #if there are no face landmarks detected it will ignore.
                     count+=1
                 # Print and draw face mesh landmarks on image.
                 else:
@@ -174,9 +173,9 @@ class Image:
             self.scaleFactor = (BaseImage.Xdifference/self.Xdifference) #a very simply formula i came up with, wasn't my first iteration, but it works now. I'm saying that like it's complex math, its literally a fraction ratio
                             #x-y coord, rotation angle, scaling factor
                                             #scale from the center of img
-            Matrix = cv.getRotationMatrix2D( (0,0) , 0, self.scaleFactor)  #I was looking for a way to scale around an image for so long, it was so simple. scaling from the corner
-            self.cvimage = cv.warpAffine(self.cvimage, Matrix, self.Dimensions) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of hte image gets cut off!
-            return Matrix
+            self.scaleMatrix = cv.getRotationMatrix2D( (0,0) , 0, self.scaleFactor)  #I was looking for a way to scale around an image for so long, it was so simple. scaling from the corner
+            self.cvimage = cv.warpAffine(self.cvimage, self.scaleMatrix, self.Dimensions,borderMode=cv.BORDER_TRANSPARENT) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of hte image gets cut off!
+            return self.scaleMatrix
 
         except Exception as error:
             pass #handling errors within the alignImagetoBaseImage class
@@ -184,76 +183,39 @@ class Image:
 
         
     def translate(self, x, y): #this function simply shifts the image so that the left eye aligns with the base images left eye.
-        transMat = np.float32([[1,0,x],[0,1,y]])
+        self.transMat = np.float32([[1,0,x],[0,1,y]])
+        self.oldEyePoints = (self.LeftEyex,self.LeftEyey)
         self.LeftEyex += x 
         self.LeftEyey += y
         self.RightEyex += x
         self.RightEyey += y #manually updating them because it'll save some computational time in refreshing the iamges.
-        self.cvimage = cv.warpAffine(self.cvimage, transMat, (self.Width,self.Height))
-        return transMat
+        self.cvimage = cv.warpAffine(self.cvimage, self.transMat, (self.Width,self.Height),borderMode=cv.BORDER_TRANSPARENT)
+        return self.transMat
 
 
     def rotateImage(self,BaseImage): #this function rotates the image so that the slope of the eyes will align with the slope of the base image, if that makes sense. if it doesn't it just makes it better trust me.
-        eyePoint = (self.LeftEyex,self.LeftEyey) #consider testing with Baseimage eye coordinates
-        angle = np.rad2deg(np.arctan((self.RightEyey-BaseImage.RightEyey)/(self.Xdifference))) #tangent formula right triangle.
-        rotationalMatrix = cv.getRotationMatrix2D(eyePoint, angle, 1.0)
-        self.cvimage = cv.warpAffine(self.cvimage, rotationalMatrix, (self.Width,self.Height)) #we use the base image's width and height in case there are different sizes, so for base image, use your smallest camera resolution photo. i took some with webcam and my phone for example, if i use my webcame image as base image, my phone will be properly scaled down.
+        self.eyePoint = (self.LeftEyex,self.LeftEyey) #consider testing with Baseimage eye coordinates
+        self.angle = np.rad2deg(np.arctan((self.RightEyey-BaseImage.RightEyey)/(self.Xdifference))) #tangent formula right triangle.
+        self.rotationalMatrix = cv.getRotationMatrix2D(self.eyePoint, self.angle, 1.0)
+        self.cvimage = cv.warpAffine(self.cvimage, self.rotationalMatrix, (self.Width,self.Height+400),borderMode=cv.BORDER_TRANSPARENT) #we use the base image's width and height in case there are different sizes, so for base image, use your smallest camera resolution photo. i took some with webcam and my phone for example, if i use my webcame image as base image, my phone will be properly scaled down.
         # finalMatrix = cv.getRotationMatrix2D((0,0) , 0, 1/self.scaleFactor)  #this is the inverse scale factor. THanks Dr. Garner.
         # self.cvimage = cv.warpAffine(self.cvimage, finalMatrix,self.Dimensions) #multiplying by 2 to ensure the entire image stays in frame, then on the rotation (the final transfomration) we scale it back down to normal to ensure none of hte image gets cut off!
-        return rotationalMatrix
+        return self.rotationalMatrix
 
     def alignImagetoBaseImage(self,BaseImage):   #eyePoint = (BaseImage.LeftEyex,BaseImage.LeftEyey)
         try:
-            whiteCanvas = np.full((BaseImage.Height+400, BaseImage.Width, 4), 255, dtype=np.uint8) # 4 channels for RGBA, alpha is needed
             initialx,initialy = BaseImage.LeftEyex,BaseImage.LeftEyey
-            scaleMatrix = self.scaleAroundPoint(BaseImage)
+            self.scaleAroundPoint(BaseImage)
             self.refreshEyeCoordinates()
             movex = initialx - self.LeftEyex
             movey = initialy - self.LeftEyey
-            translationMatrix = self.translate(movex,movey) #consider doing another final translation? cuz translate shoould come last after scaling the image back down but this is just experimental.
-            rotationalMatrix = self.rotateImage(BaseImage) # this MUST come last. idk why, but try flipping translate and rotate and see how wonky it gets.
+            self.translate(movex,movey) #consider doing another final translation? cuz translate shoould come last after scaling the image back down but this is just experimental.
+            self.rotateImage(BaseImage) # this MUST come last. idk why, but try flipping translate and rotate and see how wonky it gets.
             if self.Dimensions != BaseImage.Dimensions: #this is a check to see if we are have only 1 baseimage, this is the only time this wouldn't be equal if we have 1 base image for differing resolutioned images. it saves us throwing in an extra argument like "1baseimage" boolean, etc.
                 self.cvimage = self.cvimage[0:BaseImage.Height+400,0:BaseImage.Width] # This replaces the scaledownFunction.
                 #IF YOU'RE HAVING FUNKY RESULTS, MAKE SURE YOUR BASE IMAGE MATCHES THE SMALLEST IMAGE RESOLUTIONS OUT OF ALL OTHER 
             #IMAGES IN YOUR FOLDER! 
                 pass
-
-            dropShadow = np.full((self.Height,self.Width,4), 255, dtype=np.uint8) # 4 channels for RGBA, alpha is needed
-
-            dropShadow = cv.warpAffine(dropShadow, scaleMatrix, (self.Width, self.Height), borderMode=cv.BORDER_TRANSPARENT)
-
-            dropShadow = cv.warpAffine(dropShadow, translationMatrix, (self.Width, self.Height), borderMode=cv.BORDER_TRANSPARENT )
-
-            dropShadow = cv.warpAffine(dropShadow, rotationalMatrix, (self.Width, self.Height), borderMode=cv.BORDER_TRANSPARENT)
-            dropShadow = cv.warpAffine(dropShadow, np.float32([[1, 0, 15], [0, 1, 15]]), (self.Width, self.Height), borderMode=cv.BORDER_TRANSPARENT)
-
-            dropShadow = dropShadow[0:BaseImage.Height+400,0:BaseImage.Width] # This replaces the scaledownFunction.
-
-            # Apply Gaussian blur to the drop shadow, if you want. Values of 21 didn't seem to work for me.
-            # dropShadow = cv.GaussianBlur(dropShadow, (21, 21), sigmaX=0, sigmaY=0)
-
-            # Invert the drop shadow, so that it's black.
-            dropShadow[:, :, :3] = 255 - dropShadow[:, :, :3]
-
-            # In order to use the Pillow library, we need to convert the images to PIl's Image format.  So, we just throw them in a temp folder.
-
-            cv.imwrite("./TEMP/dropShadow.png", dropShadow)
-            cv.imwrite("./TEMP/whiteCanvas.png", whiteCanvas)
-            cv.imwrite("./TEMP/cvimage.png", self.cvimage)
-
-
-            # Open the images with Pillow
-            self.cvimage = I.open("./TEMP/cvimage.png")
-            whiteCanvas = I.open("./TEMP/whiteCanvas.png")
-            dropShadow = I.open('./TEMP/dropShadow.png').convert("RGBA")
-
-            # Paste the drop shadow on the white canvas in order from bottom to top.
-            whiteCanvas.paste(dropShadow, (0, 0), dropShadow)
-            whiteCanvas.paste(self.cvimage, (0, 0), self.cvimage)
-            whiteCanvas.save("./TEMP/combined.png")
-            whiteCanvas = np.array(whiteCanvas)
-            whiteCanvas = cv.cvtColor(whiteCanvas, cv.COLOR_RGB2BGRA)
-            self.cvimage = whiteCanvas
             
             return True
 
@@ -263,11 +225,9 @@ class Image:
             # errorLength = len(max( traceback.format_exc().split("\n") )) #an idea i gave up on       
             # Line = ''.join(['-' for i in range(errorLength)])
             Line = ''.join(['-' for i in range (28)])
-            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found (Face detection may not work on this image, Ensure the face isn't covered and lighting isn't harsh).\n2. A scaling issue occured.\nCheck out the error:\n" +traceback.format_exc() + Line +"\n")
+            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found (Face detection may not work on this image, Ensure the face isn't covered and lighting isn't harsh).\n2. A scaling issue occured.\nCheck out the error:\n" +traceback.format_exc() + Line + str(error) +"\n")
             return self.name
         
-        finally:
-            ErrorFile.close()
         
 class BaseImage(Image):
 
@@ -296,12 +256,6 @@ class BaseImage(Image):
         self.LeftEyeImageCoordinates = self.getImageCoordinates(leftEyeLandmark)
         self.RightEyeImageCoordinates = self.getImageCoordinates(rightEyeLandmark)
         try:
-            # cv.imshow("BaseImage",self.cvimage)
-            # cv.waitKey(0)
-            # cv.destroyAllWindows()
-            # cv.imshow("BaseImageCrop",self.cvimageCrop)
-            # cv.waitKey(0)
-            # cv.destroyAllWindows()
             self.LeftEyex, self.LeftEyey = self.LeftEyeImageCoordinates[0],self.LeftEyeImageCoordinates[1]
             self.RightEyex, self.RightEyey = self.RightEyeImageCoordinates[0],self.RightEyeImageCoordinates[1]
             self.Ydifference = self.RightEyey - self.LeftEyey

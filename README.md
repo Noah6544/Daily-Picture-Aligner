@@ -7,7 +7,8 @@ Have you wanted to create one of those daily picture videos, but you didn't want
 <div align=center>
   
 ### Personal Daily Photos:
-![Personal Daily Demo](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/Demos/RecentDailyGif.gif)
+![Personal Daily Demo](https://www.youtube.com/watch?v=clXYiQnD6fw)
+(note: this script doesn't add the white background, shadow, or text.)
 
 ### Unaligned Random Faces:
 ![Unaligned Random Faces](https://github.com/Noah6544/Daily-Picture-Aligner/blob/master/Demos/UnalignedRandomFaces.gif)
@@ -46,6 +47,7 @@ The project was birthed from [Hugo Cornellier's video taking a picture everyday 
 
 
 ## Known Issues:
+- Use Python version that supports mediapipe: 3.7 - 3.10
 - Sometimes, there are just some images that simply don't like getting aligned properly. I found that about 2% of my photos (out of ~300) do  this for some reason. Just delete them and keep it pushing honestly.
 - Similarly, the script will sometimes lock onto another face in the image, this happens sometimes, if it does, delete that image as it will continually make the same mistake over and over. But if your face is in the center and most prominent, it seems to do just fine. I'm working on implementing a searching method to only work on the desired face as I enjoy taking pictures spontaneously with friends and siblings and it's unfortunate to have to omit those photos.
 - The current classes.py and main.py likely has some unused code. Previous code regarding the multiple alignments hasn't been cleaned yet.
