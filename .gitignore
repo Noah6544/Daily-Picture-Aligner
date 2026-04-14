@@ -1,19 +1,16 @@
-__pycache__
-
-/ErrorLog.txt
-
-AlignedPhotos/**
-!AlignedPhotos/DELETETHIS.txt
-
-BaseImages/**
-!BaseImages/DELETETHIS.txt
-
-DailyPhotos/**
-!DailyPhotos/DELETETHIS.txt
-
-
-DailyPhotosGOOD/
-FinalAlignedPhotos/
-Video STuff/
+__pycache__/
+ErrorLog.txt
 completedImages.txt
-personal DONTPUSHTOGIT/
+
+AlignedPhotos/
+AlignedPhotosGOOD/
+FinalAlignedPhotos/
+BaseImages/
+DailyPhotos/
+DailyPhotosGOOD/
+personal/
+personal/
+
+!AlignedPhotos/DELETETHIS.txt
+!BaseImages/DELETETHIS.txt
+!DailyPhotos/DELETETHIS.txt
