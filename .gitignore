@@ -30,3 +30,11 @@ DailyPhotos/**git s
 DailyPhotosGOOD/
 DailyPhotosGOOD/**
 !DailyPhotos/DELETETHIS.txt
+DailyPhotos/**
+!DailyPhotos/DELETETHIS.txt
+
+/AlignedPhotosd/**
+
+
+/DailyPhotosdd
+

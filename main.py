@@ -106,3 +106,4 @@ print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this scr
 if len(failedImages) > 0:
     print("However, failed to align the following images: ", str(failedImages))
 input("Press Enter to exit: ")
+
