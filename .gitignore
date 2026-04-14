@@ -2,11 +2,31 @@ __pycache__
 
 /ErrorLog.txt
 
+AlignedPhotos/
 AlignedPhotos/**
+
+BaseImages/
+BaseImages/**
+
+AlignedPhotosAI/**
+AlignedPhotosGOOD/**
+AlignedPhotosReqallygood/**
+
+FinalAlignedPhotos/
+
+Personal DONTPUSHTOGIT
+Personal DONTPUSHTOGIT//
+Video STuff
+Video STuff//**
+
+completedImages.txt 
 !AlignedPhotos/DELETETHIS.txt
 
 BaseImages/**
 !BaseImages/DELETETHIS.txt
 
-DailyPhotos/**
+DailyPhotos/
+DailyPhotos/**git s
+DailyPhotosGOOD/
+DailyPhotosGOOD/**
 !DailyPhotos/DELETETHIS.txt
