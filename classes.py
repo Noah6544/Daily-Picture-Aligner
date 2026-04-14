@@ -43,10 +43,12 @@ class Image:
     # Just slowly expand the image from the center.
     # After coding the last two, this took 10 minutes to implement.
     # Plan before you code, look at all potential solutions.
+
+    # Look at increasingly larger sections of the images, starting from the center until you find the face.
     def getCorrectFace(self):
         count = 0
         faceNotFound = True
-        refineScaleFactor = 1/6
+        refineScaleFactor = 1/6 # Increase this to speed up the process, decrease it to increase accuracy but reduce speed. It is how much we expand the search area by each loop.
         self.HeightCrop,self.WidthCrop = self.cvimage.shape[:2]
         while faceNotFound:
             if refineScaleFactor > 1: #if it's too large, we can't find the face, so we just return the original image
@@ -125,9 +127,7 @@ class Image:
             self.cropStatus = "None"
         count = 0
         
-        #Progressively extends search area through relaxing crops as loop continues if face isn't found.
-          #rather- for the new crop method, parse through self.allFaces and search for the one that matches most closesly to self.averageEyeDistance
-    
+        
         try:
             #crop the image down first, if you have multiple faces in an image, this will try to limit it only to the face in teh center
             originalImage = self
@@ -225,7 +225,7 @@ class Image:
             # errorLength = len(max( traceback.format_exc().split("\n") )) #an idea i gave up on       
             # Line = ''.join(['-' for i in range(errorLength)])
             Line = ''.join(['-' for i in range (28)])
-            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found (Face detection may not work on this image, Ensure the face isn't covered and lighting isn't harsh).\n2. A scaling issue occured.\nCheck out the error:\n" +traceback.format_exc() + Line + str(error) +"\n")
+            ErrorFile.write("\nAn Error Occurred. File is: \n'" + self.name + "'\nIt is likely that:\n1. No face was found (Face detection may not work on this image, Ensure the face isn't covered and lighting isn't harsh).\n2. A scaling issue occured. \n3. Try again, or delete the image to keep going. \nCheck out the error:\n" +traceback.format_exc() + Line + str(error) +"\n")
             return self.name
         
         

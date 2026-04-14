@@ -102,7 +102,7 @@ for index, file in enumerate(tqdm(fileListSorted)):
     # break  
 
 
-print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! \nIf you want to directly support my future (college, projects, etc.), my CashApp is $NoahCutz, or you can BuyMeACoffee (https://buymeacoffee.com/noahbuchanan).")
+print("\nSuccessfully Aligned " + str(count) +" Pictures!\nIf you found this script useful, please let me know, I would love your feedback! \nIf you want to directly support my future (college, projects, etc.), you can BuyMeACoffee :D (https://buymeacoffee.com/noahbuchanan).")
 if len(failedImages) > 0:
     print("However, failed to align the following images: ", str(failedImages))
 input("Press Enter to exit: ")
